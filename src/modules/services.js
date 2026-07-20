@@ -1,49 +1,7 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { isTouch, prefersReducedMotion } from './utils.js';
-
-const SERVICES = [
-  {
-    name: 'Performance Marketing',
-    blurb: 'Paid media engineered for compounding returns, not vanity metrics. Every rupee accountable, every campaign a lesson the next one inherits.',
-    hue: '#e8b04b',
-  },
-  {
-    name: 'Branding',
-    blurb: 'Identities with a point of view — strategy, voice and visual systems built to be recognised at a glance and remembered for years.',
-    hue: '#c97b3c',
-  },
-  {
-    name: 'Web Development',
-    blurb: 'Fast, expressive digital experiences that turn curiosity into revenue. Built for performance, designed to be felt.',
-    hue: '#7ec8e8',
-  },
-  {
-    name: 'Social Media Marketing',
-    blurb: 'Feeds people actually follow. Communities that do your selling for you, one post at a time.',
-    hue: '#e0899a',
-  },
-  {
-    name: 'Influencer Marketing',
-    blurb: 'The right voices in the right rooms, with outcomes you can measure. Influence as a channel, not a gamble.',
-    hue: '#b98ef0',
-  },
-  {
-    name: 'Video Production',
-    blurb: 'Cinematic storytelling from first script to final grade. Films that carry your brand further than any ad unit.',
-    hue: '#f07a6a',
-  },
-  {
-    name: 'Content Creation',
-    blurb: 'Editorial engines that keep your brand impossible to scroll past — always on, always sharp.',
-    hue: '#8fd18a',
-  },
-  {
-    name: 'Search Engine Optimization',
-    blurb: 'Own the questions your customers are already asking. Organic growth that compounds while you sleep.',
-    hue: '#d8cc6a',
-  },
-];
+import { isTouch, prefersReducedMotion, bindAccordion } from './utils.js';
+import { services as SERVICES } from '../data/services.js';
 
 export function initServices() {
   const list = document.querySelector('[data-services-list]');
@@ -74,20 +32,7 @@ export function initServices() {
   const rows = [...list.querySelectorAll('.service-row')];
 
   /* --- accordion --- */
-  rows.forEach((row) => {
-    const btn = row.querySelector('.service-row-btn');
-    btn.addEventListener('click', () => {
-      const wasOpen = row.classList.contains('is-open');
-      rows.forEach((r) => {
-        r.classList.remove('is-open');
-        r.querySelector('.service-row-btn').setAttribute('aria-expanded', 'false');
-      });
-      if (!wasOpen) {
-        row.classList.add('is-open');
-        btn.setAttribute('aria-expanded', 'true');
-      }
-    });
-  });
+  bindAccordion(rows);
 
   /* --- staggered entrance --- */
   if (!prefersReducedMotion()) {

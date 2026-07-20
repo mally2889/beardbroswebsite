@@ -2,36 +2,28 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Beard Bros — Creative & Digital Agency, Mumbai</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Beard Bros — Creative &amp; Digital Marketing Agency in Mumbai | D2C Growth Partner</title>
     <meta
       name="description"
-      content="Beard Bros is a Mumbai-based creative and digital agency partnering with visionary founders to build brands that are impossible to ignore. Performance marketing, branding, web, content and influencer marketing."
+      content="Beard Bros is a Mumbai-based creative and digital agency partnering with D2C founders to build brands impossible to ignore. Performance marketing, branding, web development, content, social and influencer marketing — 100+ brands, ₹5cr+ media spend managed."
     />
     <meta property="og:title" content="Beard Bros — We make brands impossible to ignore" />
     <meta
       property="og:description"
-      content="Creative & digital agency in Mumbai. 1700% ROAS, 6X growth stories, 50+ brands transformed."
+      content="Mumbai creative & digital agency. 1700% ROAS, 6X growth stories, 100+ brands partnered across India and the US."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://beardbros.in/" />
     <meta name="theme-color" content="#0b0a08" />
     <link rel="canonical" href="https://beardbros.in/" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
     <link rel="preconnect" href="https://api.fontshare.com" />
     <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
       href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600&f[]=satoshi@400,500,700&display=swap"
     />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap"
-    />
-    <link rel="stylesheet" href="/src/styles/main.css" />
 
     <script type="application/ld+json">
       {
@@ -39,244 +31,178 @@
         "@type": "Organization",
         "name": "Beard Bros",
         "url": "https://beardbros.in",
-        "description": "Creative and digital agency in Mumbai, India.",
+        "description": "Creative and digital marketing agency in Mumbai, India, specialising in D2C brand growth.",
         "address": { "@type": "PostalAddress", "addressLocality": "Mumbai", "addressCountry": "IN" },
-        "sameAs": ["https://www.instagram.com/beardbrosagency"]
+        "founder": [
+          { "@type": "Person", "name": "Malcolm Pinto", "jobTitle": "Co-Founder" },
+          { "@type": "Person", "name": "Melroy Pinto", "jobTitle": "Co-Founder" }
+        ],
+        "knowsAbout": [
+          "Performance Marketing",
+          "Branding",
+          "Web Development",
+          "Social Media Marketing",
+          "Influencer Marketing",
+          "Video Production",
+          "Content Creation",
+          "Search Engine Optimization"
+        ],
+        "sameAs": [
+          "https://www.instagram.com/beardbrosagency",
+          "https://www.linkedin.com/company/beard-bros",
+          "https://www.facebook.com/BeardBrosCreative"
+        ]
       }
     </script>
+
+    <!--
+      Decide phone vs. desktop shell before first paint — this must run
+      synchronously, ahead of any CSS or module load, or both shells flash
+      unstyled for a frame. Each shell's own stylesheet (pulled in via its
+      JS module's `import './styles/*.css'`) is what turns its container
+      back on; until then both are hidden by the inline style below.
+    -->
+    <script>
+      (function () {
+        var isDesktop = window.matchMedia('(min-width: 880px)').matches;
+        document.documentElement.classList.add(isDesktop ? 'os-desktop' : 'os-phone');
+      })();
+    </script>
+    <style>
+      .stage,
+      .dt-desktop {
+        display: none;
+      }
+    </style>
   </head>
   <body>
-    <!-- preloader -->
-    <div class="preloader" aria-hidden="true">
-      <div class="preloader-word" data-preloader-word>BEARD BROS</div>
-      <div class="preloader-count" data-preloader-count>00</div>
-      <div class="preloader-bar" data-preloader-bar></div>
-    </div>
-
-    <!-- page transition veil -->
-    <div class="veil" data-veil aria-hidden="true"></div>
-
-    <!-- grain -->
-    <div class="grain" aria-hidden="true"></div>
-
-    <!-- cursor -->
-    <div class="cursor" data-cursor aria-hidden="true"><span class="cursor-label" data-cursor-label>View</span></div>
-    <div class="cursor-dot" data-cursor-dot aria-hidden="true"></div>
-
-    <!-- nav -->
-    <header class="nav" data-nav>
-      <a href="/" class="nav-logo" aria-label="Beard Bros — home">
-        <span class="full">Beard</span><em>Bros</em>
-      </a>
-      <button class="nav-toggle" data-menu-toggle aria-expanded="false" aria-controls="menu">
-        <span class="nav-toggle-dot" aria-hidden="true"></span>
-        <span class="label-menu">Menu</span>
-        <span class="label-close">Close</span>
-      </button>
-    </header>
-
-    <!-- fullscreen menu -->
-    <nav class="menu" id="menu" data-menu aria-hidden="true">
-      <ul class="menu-list">
-        <li><a class="menu-link" href="#work" data-menu-link><span class="menu-index">01</span><span class="menu-word">Work</span></a></li>
-        <li><a class="menu-link" href="#services" data-menu-link><span class="menu-index">02</span><span class="menu-word">Services</span></a></li>
-        <li><a class="menu-link" href="#manifesto" data-menu-link><span class="menu-index">03</span><span class="menu-word">Agency</span></a></li>
-        <li><a class="menu-link" href="#voices" data-menu-link><span class="menu-index">04</span><span class="menu-word">Voices</span></a></li>
-        <li><a class="menu-link" href="#contact" data-menu-link><span class="menu-index">05</span><span class="menu-word">Contact</span></a></li>
-      </ul>
-      <div class="menu-foot" data-menu-foot>
-        <span>Mumbai, India</span>
-        <a href="https://www.instagram.com/beardbrosagency" target="_blank" rel="noopener">Instagram</a>
-        <a href="https://www.linkedin.com/company/beard-bros" target="_blank" rel="noopener">LinkedIn</a>
-      </div>
-    </nav>
-
-    <main id="main">
-      <!-- ================= HERO ================= -->
-      <section class="hero" data-hero>
-        <div class="hero-gl" data-hero-gl aria-hidden="true"></div>
-        <div class="hero-content">
-          <p class="hero-eyebrow" data-hero-eyebrow>
-            <span class="pulse" aria-hidden="true"></span>
-            Creative &amp; Digital Agency — Mumbai
-          </p>
-          <h1 class="h-display hero-title" data-hero-title>
-            We make brands <em class="h-serif">impossible</em> to ignore.
-          </h1>
-          <div class="hero-sub" data-hero-sub>
-            <p>
-              Beard Bros partners with visionary founders and teams to build brands that don't
-              just grow — they take over. Strategy, story and craft, fused into growth engines.
-            </p>
-            <div class="hero-cta">
-              <a href="#contact" class="btn btn--solid" data-magnetic>
-                Start a project <span class="btn-arrow" aria-hidden="true">→</span>
-              </a>
-              <a href="#work" class="btn" data-magnetic>See the work</a>
-            </div>
-          </div>
-        </div>
-        <span class="hero-scroll" aria-hidden="true">Scroll</span>
+    <!--
+      Crawler / assistive-tech twin. The OS is a visual layer; this is the
+      document that actually gets indexed and read aloud.
+    -->
+    <main class="sr-only" id="semantic">
+      <h1>Beard Bros — end-to-end digital marketing</h1>
+      <p>
+        Beard Bros is a digital marketing agency working across performance media, brand, web,
+        social and content, in India and the US.
+      </p>
+      <section>
+        <h2>Services</h2>
+        <ul data-semantic-services></ul>
       </section>
-
-      <!-- ================= MANIFESTO ================= -->
-      <section class="section manifesto" id="manifesto" data-manifesto>
-        <div class="section-head">
-          <span class="kicker">The Agency</span>
-          <span class="section-count">01</span>
-        </div>
-        <div class="manifesto-inner">
-          <p class="manifesto-text" data-manifesto-text>
-            Most agencies chase <em>impressions.</em> We engineer <em>obsession.</em> Strategy,
-            story and craft — fused into <em>growth engines</em> for brands with the guts to
-            <em>stand out.</em>
-          </p>
-        </div>
-      </section>
-
-      <!-- ================= SERVICES ================= -->
-      <section class="section" id="services" data-services>
-        <div class="section-head">
-          <span class="kicker">What we do</span>
-          <span class="section-count">02</span>
-        </div>
-        <ul class="services-list" data-services-list>
-          <!-- rows injected by services.js -->
-        </ul>
-        <div class="service-preview" data-service-preview aria-hidden="true"></div>
-      </section>
-
-      <!-- ================= WORK ================= -->
-      <section class="section work" id="work" data-work>
-        <div class="section-head">
-          <span class="kicker">Selected Work</span>
-          <span class="section-count">03</span>
-        </div>
-        <div class="work-track-wrap" data-work-wrap>
-          <div class="work-track" data-work-track>
-            <!-- cards injected by work-gallery.js -->
-          </div>
-        </div>
-      </section>
-
-      <!-- ================= STATS ================= -->
-      <section class="section stats" data-stats>
-        <div class="stats-grid">
-          <div class="stat">
-            <div class="stat-value" data-count="1700" data-suffix="%">0%</div>
-            <div class="stat-label">Consistent ROAS for a D2C kids nutrition brand</div>
-          </div>
-          <div class="stat">
-            <div class="stat-value" data-count="6" data-suffix="X">0X</div>
-            <div class="stat-label">Sales growth for a merch store — during lockdown</div>
-          </div>
-          <div class="stat">
-            <div class="stat-value" data-count="400" data-suffix="%">0%</div>
-            <div class="stat-label">ROAS in six months for a gourmet food brand</div>
-          </div>
-          <div class="stat">
-            <div class="stat-value" data-count="50" data-suffix="+">0+</div>
-            <div class="stat-label">Brands partnered across India and the US</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ================= TESTIMONIALS ================= -->
-      <section class="section" id="voices" data-quotes>
-        <div class="section-head">
-          <span class="kicker">Founders on us</span>
-          <span class="section-count">04</span>
-        </div>
-        <div class="quotes-viewport">
-          <div class="quotes-track" data-quotes-track>
-            <blockquote class="quote-slide">
-              <span class="quote-mark" aria-hidden="true">“</span>
-              <p class="quote-text">Beard Bros transformed our digital presence, spearheading web development, ecommerce, social media, and influencer marketing.</p>
-              <footer class="quote-who"><strong>Ashutosh Valani</strong><span>Beardo</span></footer>
-            </blockquote>
-            <blockquote class="quote-slide">
-              <span class="quote-mark" aria-hidden="true">“</span>
-              <p class="quote-text">Their expertise in social media, paid marketing, and event support has truly fueled our growth.</p>
-              <footer class="quote-who"><strong>Richa Pendake</strong><span>Nutrizoe</span></footer>
-            </blockquote>
-            <blockquote class="quote-slide">
-              <span class="quote-mark" aria-hidden="true">“</span>
-              <p class="quote-text">They are our ultimate partner for all things related to brand growth.</p>
-              <footer class="quote-who"><strong>Rishabh Chokhani</strong><span>Naturevibe Botanicals</span></footer>
-            </blockquote>
-            <blockquote class="quote-slide">
-              <span class="quote-mark" aria-hidden="true">“</span>
-              <p class="quote-text">Beard Bros is more than just a digital marketing agency; they are true growth partners.</p>
-              <footer class="quote-who"><strong>Rahul Satia</strong><span>CelfieDesign</span></footer>
-            </blockquote>
-          </div>
-        </div>
-        <div class="quotes-nav">
-          <button class="quotes-arrow" data-quote-prev aria-label="Previous testimonial">←</button>
-          <button class="quotes-arrow" data-quote-next aria-label="Next testimonial">→</button>
-          <span class="quotes-progress" data-quote-progress>01 / 04</span>
-        </div>
-      </section>
-
-      <!-- ================= CLIENTS ================= -->
-      <section class="section clients" data-clients>
-        <div class="section-head">
-          <span class="kicker">In good company</span>
-          <span class="section-count">05</span>
-        </div>
-        <div class="marquee" data-marquee data-marquee-dir="1"></div>
-        <div class="marquee" data-marquee data-marquee-dir="-1"></div>
-      </section>
-
-      <!-- ================= CONTACT ================= -->
-      <section class="section contact" id="contact" data-contact>
-        <h2 class="h-display contact-title" data-contact-title>
-          Have a brand worth <em class="h-serif">building?</em>
-        </h2>
-        <p class="contact-sub">
-          Tell us where you want to go. We'll bring the map, the engine and the momentum.
-        </p>
-        <form class="contact-form" data-contact-form action="#" method="post">
-          <div class="field">
-            <label for="f-name">Your name</label>
-            <input id="f-name" name="name" type="text" autocomplete="name" required />
-          </div>
-          <div class="field">
-            <label for="f-email">Email address</label>
-            <input id="f-email" name="email" type="email" autocomplete="email" required />
-          </div>
-          <div class="field">
-            <label for="f-msg">What are we building?</label>
-            <textarea id="f-msg" name="message" rows="3" required></textarea>
-          </div>
-          <button type="submit" class="btn btn--solid" data-magnetic>
-            Send enquiry <span class="btn-arrow" aria-hidden="true">→</span>
-          </button>
-          <p class="form-note" data-form-note></p>
-        </form>
+      <section>
+        <h2>Work</h2>
+        <ul data-semantic-work></ul>
       </section>
     </main>
 
-    <!-- ================= FOOTER ================= -->
-    <footer class="footer">
-      <div class="footer-grid">
-        <div>Mumbai, India</div>
-        <div>
-          <a href="https://www.instagram.com/beardbrosagency" target="_blank" rel="noopener">Instagram</a>
-          &nbsp;·&nbsp;
-          <a href="https://www.linkedin.com/company/beard-bros" target="_blank" rel="noopener">LinkedIn</a>
-          &nbsp;·&nbsp;
-          <a href="https://www.facebook.com/beardbrosagency" target="_blank" rel="noopener">Facebook</a>
-        </div>
-        <a href="#main" data-to-top>Back to top ↑</a>
-      </div>
-      <div class="footer-wordmark" data-wordmark aria-hidden="true">BEARD BROS</div>
-      <div class="footer-legal">
-        <span>© <span data-year>2026</span> Beard Bros. All rights reserved.</span>
-        <span>Crafted with an unreasonable attention to detail.</span>
-      </div>
-    </footer>
+    <div class="stage">
+      <div class="stage__glow" aria-hidden="true"></div>
 
-    <script type="module" src="/src/main.js"></script>
+      <div class="device">
+        <div class="device__screen" data-screen>
+          <div class="wallpaper" aria-hidden="true"></div>
+
+          <div class="statusbar">
+            <span class="statusbar__time" data-clock>--:--</span>
+            <span class="statusbar__notch" aria-hidden="true"></span>
+            <span class="statusbar__right">
+              <span class="statusbar__dot" aria-hidden="true"></span>
+              Available
+            </span>
+          </div>
+
+          <!-- Paged springboard: services, then work. -->
+          <div class="springboard" data-springboard>
+            <div class="pages" data-pages>
+              <section class="page" aria-label="Home">
+                <div class="widget">
+                  <p class="widget__label">Beard Bros · Mumbai</p>
+                  <p class="widget__lede">
+                    Two brothers, one system. Paid media, brand, web, social and content
+                    that share a strategy and a single set of numbers.
+                  </p>
+                  <dl class="widget__stats">
+                    <div><dt>Since</dt><dd>2015</dd></div>
+                    <div><dt>Clients</dt><dd>100+</dd></div>
+                    <div><dt>Media</dt><dd>₹5Cr+</dd></div>
+                  </dl>
+                </div>
+                <div class="grid" data-grid-system role="list"></div>
+              </section>
+
+              <section class="page" aria-label="Today">
+                <p class="springboard__label">Today</p>
+                <div class="today" data-today></div>
+              </section>
+            </div>
+          </div>
+
+          <div class="pagedots" data-dots role="tablist" aria-label="Home screen pages"></div>
+
+          <div class="dock" data-dock role="list"></div>
+
+          <!-- Sits above the app panel: this is the way home. -->
+          <div class="homebar" data-homebar>
+            <button class="homebar__hit" type="button" data-close hidden aria-label="Close app">
+              Close
+            </button>
+            <span class="homebar__line" aria-hidden="true"></span>
+          </div>
+
+          <section class="app" data-app hidden aria-labelledby="app-title">
+            <header class="app__chrome">
+              <button class="app__back" type="button" data-close-2 aria-label="Back to home screen">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M15 5l-7 7 7 7" />
+                </svg>
+              </button>
+              <span class="app__mark" data-app-mark aria-hidden="true"></span>
+              <h2 class="app__title" id="app-title" data-app-title tabindex="-1"></h2>
+            </header>
+            <div class="app__body" data-app-body></div>
+          </section>
+
+          <div class="cc" data-cc aria-hidden="true">
+            <div class="cc__sheet" data-cc-sheet>
+              <span class="cc__grabber" aria-hidden="true"></span>
+              <div class="cc__toggles" data-cc-toggles></div>
+              <div class="cc__slider">
+                <div class="cc__slider-head">
+                  <span>Brightness</span>
+                  <span class="cc__slider-val" data-cc-bright-val>100%</span>
+                </div>
+                <input type="range" class="cc__range" data-cc-brightness min="45" max="100" value="100" step="1" aria-label="Screen brightness" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dt-desktop" data-desktop>
+      <div class="dt-wallpaper" aria-hidden="true"></div>
+
+      <div class="dt-menubar">
+        <span class="dt-menubar__brand">Beard Bros</span>
+        <span class="dt-menubar__menu">File</span>
+        <span class="dt-menubar__menu">Edit</span>
+        <span class="dt-menubar__menu">View</span>
+        <span class="dt-menubar__menu">Window</span>
+        <span class="dt-menubar__spacer"></span>
+        <span class="dt-menubar__status">
+          <span class="dt-menubar__dot" aria-hidden="true"></span>
+          Available
+        </span>
+        <span class="dt-menubar__time" data-dt-clock>--:--</span>
+      </div>
+
+      <div class="dt-windows" data-dt-windows></div>
+
+      <div class="dt-dock" data-dt-dock role="list"></div>
+    </div>
+
+    <script type="module" src="/src/os-entry.js"></script>
   </body>
 </html>

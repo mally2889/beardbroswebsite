@@ -1,0 +1,395 @@
+/**
+ * Case studies, rewritten as long reads.
+ *
+ * Every number here comes from the published write-ups on beardbros.in — the
+ * prose is new, the facts are not. Read in the Safari app, one per tab.
+ */
+
+export const caseStudies = [
+  {
+    slug: 'kids-nutrition',
+    client: 'Early Foods',
+    monogram: 'Ef',
+    sector: 'Children’s nutrition · D2C',
+    year: '2023',
+    accent: '#e8a13a',
+    dek: 'Two platforms, one budget, and the discipline to stop guessing.',
+    metrics: [
+      { value: '17.78', label: 'ROAS, up from 8.72' },
+      { value: '157%', label: 'lift in conversion rate' },
+      { value: '42,457', label: 'clicks at peak' },
+    ],
+    read: '4 min',
+    sections: [
+      {
+        heading: 'The problem with parents',
+        paras: [
+          'Parents are the hardest audience on the internet. They research obsessively, they distrust claims, and they will abandon a cart to go read a label. Early Foods, selling children’s nutrition direct-to-consumer, was spending real money into that scepticism and getting a return of 8.72 — respectable on paper, and quietly leaving most of the budget on the table.',
+          'The brief was not "spend more." It was: find out which half of this is working, and stop paying for the other half.',
+        ],
+      },
+      {
+        heading: 'Google: fewer clicks, better clicks',
+        paras: [
+          'The instinct in a crowded category is to buy volume. We went the other way. Traffic was tightened around intent rather than reach, which pushed click-through from 1.27% to 1.71% — a 34% improvement that sounds small and is not. Every point of CTR is a point of relevance the auction rewards, so the same budget started buying better placements.',
+          'Volume did not collapse; it peaked at 42,457 clicks. But the composition changed. We were paying for people who were already looking for what the brand sold, instead of interrupting people who weren’t.',
+        ],
+      },
+      {
+        heading: 'Where the compounding happened',
+        paras: [
+          'ROAS moved from 8.72 to 17.78. That is a 103% increase, and it did not come from one clever campaign — it came from a weekly cadence of killing what underperformed before it could drain the month.',
+          'Conversion rate rose 157%, which is the number we actually care about. Traffic improvements that don’t convert are vanity. This one carried all the way through to revenue.',
+        ],
+      },
+      {
+        heading: 'What we’d tell you honestly',
+        paras: [
+          'A 1700% ROAS makes a good headline and a bad expectation. It is the product of a specific category, a specific margin structure, and a year of compounding decisions. What transfers is not the number — it is the method: measure to the sale, cut fast, and let the winners inherit the budget.',
+        ],
+      },
+    ],
+  },
+
+  {
+    slug: 'chenab-seo',
+    client: 'Chenab Gourmet',
+    monogram: 'Cg',
+    sector: 'Gourmet food · B2B → D2C',
+    year: '2021',
+    accent: '#c9736a',
+    dek: 'A wholesaler lost its restaurants overnight. Search gave it customers instead.',
+    metrics: [
+      { value: '372%', label: 'increase in impressions' },
+      { value: '130%', label: 'increase in organic clicks' },
+      { value: '50%', label: 'improvement in search position' },
+    ],
+    read: '4 min',
+    sections: [
+      {
+        heading: 'When your entire customer base closes',
+        paras: [
+          'Chenab Gourmet supplied the kitchens behind some of India’s best restaurants — imported ingredients, specialist equipment, the things chefs order and diners never see. It was a pure B2B business, and it worked, right up until March 2020.',
+          'Lockdown did not slow their category down. It switched it off. Institutional sales collapsed, and a warehouse of premium stock had nowhere to go. Going direct to consumers stopped being a growth idea and became a survival plan.',
+        ],
+      },
+      {
+        heading: 'Why search, and not ads',
+        paras: [
+          'Paid media would have bought traffic immediately and stopped the moment the budget did. For a brand rebuilding its entire commercial model, that is renting a business rather than owning one.',
+          'Search was the harder, slower, better answer. Nobody in India was searching for Chenab Gourmet — but plenty were searching for the products it had exclusive access to. The work was making the brand the obvious answer to questions people were already asking.',
+        ],
+      },
+      {
+        heading: 'A year of compounding',
+        paras: [
+          'Impressions rose 372%. Organic clicks rose 130%. Average search position improved by half. Those three numbers describe one thing: the brand went from invisible to findable, and then from findable to preferred.',
+          'The gap between the impression figure and the click figure is the interesting part. Visibility grew faster than traffic, which is exactly what you expect early in a search build — you surface for far more queries than you immediately win. That gap is future revenue, sitting there waiting to be closed.',
+        ],
+      },
+      {
+        heading: 'The lasting bit',
+        paras: [
+          'The pandemic ended. The D2C channel did not. Chenab now reaches home cooks directly, which is a second business its B2B model could never have produced — built during the worst possible year, out of necessity.',
+        ],
+      },
+    ],
+  },
+
+  {
+    slug: 'chenab-roas',
+    client: 'Chenab Gourmet',
+    monogram: 'Ch',
+    sector: 'Gourmet food · Performance',
+    year: '2021',
+    accent: '#b5844a',
+    dek: 'Selling ₹40,000 kitchen equipment to strangers on the internet.',
+    metrics: [
+      { value: '400%', label: 'ROAS in six months' },
+      { value: '1000%', label: 'increase in average order value' },
+      { value: '1.5%', label: 'click-through rate' },
+    ],
+    read: '4 min',
+    sections: [
+      {
+        heading: 'The asset nobody had noticed',
+        paras: [
+          'Chenab held exclusive Indian distribution for Camerons, Maple Joe, Hugo Reitzel, Tate & Lyle, iSi and Coravin. In B2B, that was a supply advantage. Online, it was something more useful: a catalogue of things you genuinely could not buy on Amazon.',
+          'Most D2C food brands fight on price against marketplaces they cannot beat. This one didn’t have to compete at all. The entire strategy followed from that.',
+        ],
+      },
+      {
+        heading: 'Selling scarcity, not discounts',
+        paras: [
+          'The creative stopped talking about products and started talking about access — the ingredient a chef you follow actually uses, the wine preservation system you have read about and never seen for sale here.',
+          'That reframing changed who bought. Instead of price-led shoppers, we reached serious home cooks who were already looking for exactly this and had given up finding it.',
+        ],
+      },
+      {
+        heading: 'The number that matters',
+        paras: [
+          'ROAS hit 400% in six months. But the figure we would point at is average order value, up 1000% — driven by high-value kitchen equipment rather than pantry items.',
+          'A tenfold AOV increase changes the economics of everything upstream. Suddenly you can afford a higher cost per acquisition, longer consideration windows, and more expensive placements, because each conversion is worth an order of magnitude more. Most brands chase ROAS directly. It is often easier to move AOV and let ROAS follow.',
+        ],
+      },
+      {
+        heading: 'What changed beyond sales',
+        paras: [
+          'Six months in, the brand had shed the B2B label. It was no longer a supplier that also had a website — it was a destination for people who cook seriously, with a point of view about what belongs in a kitchen.',
+        ],
+      },
+    ],
+  },
+
+  {
+    slug: 'moduli',
+    client: 'MODULI',
+    monogram: 'Mo',
+    sector: 'Modular construction · Hyderabad',
+    year: '2023',
+    accent: '#8fa87e',
+    dek: 'Generating demand for a product most of the market didn’t know existed.',
+    metrics: [
+      { value: '1000+', label: 'leads generated' },
+      { value: '₹21', label: 'cost per lead' },
+      { value: '150%', label: 'increase in reach' },
+    ],
+    read: '4 min',
+    sections: [
+      {
+        heading: 'Not a positioning problem — a literacy problem',
+        paras: [
+          'MODULI is a Hyderabad modular construction company, built out of NCL’s manufacturing and the House of Moravia’s design experience. The product is genuinely good. The obstacle was that most of its potential market did not know modular construction was a category they could choose.',
+          'You cannot sell share in a category that does not exist in the buyer’s head. Before any campaign could work, the market needed teaching.',
+        ],
+      },
+      {
+        heading: 'Educate first, capture second',
+        paras: [
+          'The top of the funnel did no selling at all. It explained what modular construction is, where it makes sense, what it costs, and — importantly — where it doesn’t make sense. Honesty about the limits bought credibility for the claims.',
+          'Only once someone understood the category did we ask for anything. By then the conversation was about fit rather than persuasion, which is a much shorter conversation.',
+        ],
+      },
+      {
+        heading: '₹21 a lead',
+        paras: [
+          'Over a thousand leads at ₹21 each, with reach up 150%. In a considered-purchase category — where a lead can be worth lakhs — that cost per lead is not a marginal efficiency. It changes what the sales team can afford to do with its time.',
+          'That was the second half of the brief, and the part most agencies skip: MODULI needed a sales function to receive this volume. Demand generation without the capacity to answer it just manufactures frustration.',
+        ],
+      },
+      {
+        heading: 'Why it worked',
+        paras: [
+          'Category-creation marketing is slower and less satisfying than harvesting existing demand. It is also more defensible. The brand that teaches the market gets to define the terms the market uses — and every competitor who arrives later inherits those terms.',
+        ],
+      },
+    ],
+  },
+
+  {
+    slug: 'celfiedesign',
+    client: 'CelfieDesign',
+    monogram: 'Cf',
+    sector: 'Mobile & tech accessories · second engagement',
+    year: '2024',
+    accent: '#5aa9d8',
+    dek: 'A thousand designs, no distinctiveness, three months to fix it.',
+    metrics: [
+      { value: '5.7X', label: 'return on ad spend' },
+      { value: '₹22L+', label: 'sales over three months' },
+      { value: '40%', label: 'repeat purchases' },
+    ],
+    read: '4 min',
+    sections: [
+      {
+        heading: 'Lost in a category that all looks the same',
+        paras: [
+          'CelfieDesign had over a thousand licensed designs and real production agility. It also had Macmerise and CoverItUp above it — larger, better known, and occupying the space in customers’ heads.',
+          'The problem was not product. Every phone case brand shows you a grid of phone cases. Nothing in the category tells you why one grid is better than another, so buyers default to whoever they’ve heard of.',
+        ],
+      },
+      {
+        heading: 'Two levers, pulled together',
+        paras: [
+          'Performance marketing did the arithmetic: find the designs with genuine pull, put the budget behind them, and stop spreading spend evenly across a catalogue where most items would never sell.',
+          'Social did the character work. A licensed-design library is only an advantage if people see the designs they personally care about. That is a content problem, not a media problem, and it needed the brand to have a voice rather than a catalogue.',
+        ],
+      },
+      {
+        heading: 'Ninety days',
+        paras: [
+          '5.7X ROAS and ₹22 lakh in sales over three months. But the number worth dwelling on is 40% repeat purchases.',
+          'Repeat rate is the honest test of whether marketing built a brand or just rented attention. Two in five customers coming back means the product delivered and the brand was memorable enough to return to deliberately. You cannot buy that with media spend — it either happens or it doesn’t.',
+        ],
+      },
+      {
+        heading: 'The takeaway',
+        paras: [
+          'Challenger brands do not win by outspending incumbents. They win by being specific where incumbents are general. CelfieDesign went from indistinguishable to credible in a quarter, without a budget that could have bought its way there.',
+        ],
+      },
+    ],
+  },
+
+  {
+    slug: 'merch-store',
+    client: 'CelfieDesign',
+    monogram: 'Cl',
+    sector: 'Merchandise · Shopify · first engagement',
+    year: '2020',
+    accent: '#c96a6a',
+    dek: 'Lockdown closed the shops. The store had its best six months.',
+    metrics: [
+      { value: '6X', label: 'increase in sales' },
+      { value: '₹3.5L', label: 'first-month sales on ₹50K spend' },
+      { value: '4X', label: 'sustained ROAS' },
+    ],
+    read: '3 min',
+    sections: [
+      {
+        heading: 'The month everything moved online',
+        paras: [
+          'CelfieDesign first came to us during lockdown — four years before the brand-building work in the other study — when every competitor’s physical distribution had gone dark and every customer had moved to a screen. That is a rare window: demand concentrated in one channel, and most incumbents unprepared for it.',
+          'The first month returned ₹3.5 lakh in sales on ₹50,000 of ad spend. The point was not the multiple — it was proof the demand was there and could be reached cheaply while everyone else caught up.',
+        ],
+      },
+      {
+        heading: 'Holding the line for five months',
+        paras: [
+          'Early wins in a disrupted market are easy to mistake for skill. The real work was the next five months: ₹11 lakh in sales against ₹3.5 lakh of spend, a steady 4X, while acquisition costs across every category climbed as competitors arrived.',
+          'That came from custom audiences and catalogue ads doing the targeting, campaign budget optimisation moving money toward what worked without waiting for a human, and retargeting concentrated on people who had already shown intent.',
+        ],
+      },
+      {
+        heading: 'Six times',
+        paras: [
+          'Sales ended six times higher than where they started. The lesson is not that lockdown was good for ecommerce — it is that the brands which gained were the ones with the operational capacity to absorb a channel shift in weeks rather than quarters.',
+        ],
+      },
+    ],
+  },
+
+  {
+    slug: 'beardo',
+    client: 'Beardo',
+    monogram: 'Be',
+    sector: 'Men’s grooming · D2C',
+    year: '2016 — 2019',
+    accent: '#d4a94e',
+    dek: 'Three products on Amazon. Three years later, acquired by Marico.',
+    metrics: [
+      { value: '3 yrs', label: 'of grassroots brand building' },
+      { value: '3', label: 'products at the start' },
+      { value: 'Marico', label: 'eventual acquirer' },
+    ],
+    read: '3 min',
+    sections: [
+      {
+        heading: 'Before anyone had heard of them',
+        paras: [
+          'Beardo now sits in the same sentence as Brylcreem, Cinthol and The Man Company. When they came to us, they were a startup with three products newly listed on Amazon and no brand to speak of.',
+          'The category barely existed in India. Grooming for bearded men was not a market with share to take — it was a behaviour that needed normalising first.',
+        ],
+      },
+      {
+        heading: 'A voice, not a campaign',
+        paras: [
+          'We built the brand communications around strong imagery and deliberately risqué content aimed at real men rather than an idealised version of them. It was not safe work, and safe work would not have cut through.',
+          'Within a year the visual language and tone of voice were set. They are still in use. That is the part we are proudest of — not a campaign that peaked, but a system the brand kept running long after we handed it over.',
+        ],
+      },
+      {
+        heading: 'Everything, not just social',
+        paras: [
+          'We built and ran the Beardo website, handled order management and backend operations, ran the entire social communication, managed media spend, and produced brand collateral down to hoardings, brochures and mailers.',
+          'Three years of that grassroots work is what brought national recognition — and, we like to think, Marico’s attention. It is the clearest example of what we mean by end-to-end: when one team holds the voice, the storefront and the spend, they stop contradicting each other.',
+        ],
+      },
+    ],
+  },
+
+  {
+    slug: 'naturevibe',
+    client: 'Naturevibe Botanicals',
+    monogram: 'Nv',
+    sector: 'Organic wellness · USA',
+    year: '2021',
+    accent: '#8fd18a',
+    dek: 'An Indian brand that had to feel American to sell in America.',
+    metrics: [
+      { value: 'USA', label: 'market entry from India' },
+      { value: 'Organic', label: 'influencer-led strategy' },
+      { value: 'Instagram', label: 'primary channel' },
+    ],
+    read: '4 min',
+    sections: [
+      {
+        heading: 'A crowded shelf, eight thousand miles away',
+        paras: [
+          'Naturevibe Botanicals is a homegrown organic supplements and raw foods brand that wanted to matter in the United States — and, more specifically, to be perceived as American at heart. The American wellness market is not underserved. It is saturated.',
+          'Outspending established players was never realistic. So the question became how a new brand earns trust in a market where everyone is already loyal to something.',
+        ],
+      },
+      {
+        heading: 'What the research actually said',
+        paras: [
+          'American health food buyers already know what they want. They do not need educating on ingredient benefits and they visibly resist being sold to. What moves them is word of mouth — someone they already trust using the thing.',
+          'That finding killed the conventional plan. Benefit-led advertising would have been ignored. The budget had to buy credibility instead of reach.',
+        ],
+      },
+      {
+        heading: 'Recipes, not adverts',
+        paras: [
+          'We worked with creators in health, wellness, vegan cooking and lifestyle — sending product and collaborating on actual recipes: smoothies, cookies, keto snacks. Real things people would make.',
+          'Those recipes ran on the creators’ own well-trafficked Instagram accounts with proper tagging, then were collected back onto the brand’s page. That inverted the usual flow: instead of a brand broadcasting, the brand became a library of things real people had cooked with it.',
+          'Paid support stayed deliberately light. Most posts were never boosted and earned their traction unassisted — which is the strongest available signal that the content was actually good rather than merely distributed.',
+        ],
+      },
+      {
+        heading: 'Where it stands',
+        paras: [
+          'Perception, image and ethos shifted, and sales followed indirectly. Creators now approach the brand rather than the other way round. The ongoing work is shifting revenue away from marketplaces and onto naturevibe.com, so the brand owns its customer relationships rather than renting them from Amazon.',
+        ],
+      },
+    ],
+  },
+
+  {
+    slug: 'hiphop',
+    client: 'Hip Hop Skincare',
+    monogram: 'Hh',
+    sector: 'Skincare · D2C',
+    year: '2024',
+    accent: '#d87fa8',
+    dek: 'Famous for one product, invisible for everything else.',
+    metrics: [
+      { value: '2.4X', label: 'return on ad spend' },
+      { value: '₹3L', label: 'sales over three months' },
+      { value: '37L', label: 'impressions' },
+    ],
+    read: '3 min',
+    sections: [
+      {
+        heading: 'The one-hit problem',
+        paras: [
+          'Hip Hop Skincare is known for its blackhead remover strips — genuinely iconic, and the whole problem. Everything else the brand made lived in that product’s shadow, and awareness for newer lines was close to nil.',
+          'Meanwhile Mamaearth and Sugar Cosmetics were setting the pace in the category with far larger budgets and much broader ranges.',
+        ],
+      },
+      {
+        heading: 'Get Glow',
+        paras: [
+          'Rather than a general awareness push, we built around a specific sale event. A deadline gives people a reason to act now instead of filing you under "maybe later" — and it gives creators something concrete to talk about.',
+          'The creator partnerships did the heavy lifting on discovery, while paid was pointed at value propositions rather than brand messaging. In a category this crowded, the brand story is not what closes the sale.',
+        ],
+      },
+      {
+        heading: 'Three months',
+        paras: [
+          '2.4X ROAS, ₹3 lakh in sales, 37 lakh impressions. Modest against the kids-nutrition numbers, and honestly so — reviving awareness for a brand that had gone quiet is harder work than scaling one with momentum.',
+          'The impressions figure is the one with a future in it. Thirty-seven lakh people were reminded the brand exists and makes more than one thing. That is the groundwork the next campaign gets to build on.',
+        ],
+      },
+    ],
+  },
+];

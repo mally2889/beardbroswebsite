@@ -1,0 +1,1200 @@
+/**
+ * Beard Bros OS — prototype styles.
+ *
+ * Self-contained on purpose: tokens are copied from main.css rather than
+ * imported, so the spike can be thrown away (or promoted) without touching
+ * the live stylesheet.
+ */
+
+:root {
+  --ink: #0b0a08;
+  --ink-2: #12100d;
+  --ink-3: #1a1713;
+  --bone: #ece5d8;
+  --copper: #c97b3c;
+  --amber: #e8b04b;
+  --line: rgba(236, 229, 216, 0.12);
+
+  --font-display: 'Clash Display', 'Archivo', system-ui, sans-serif;
+  --font-body: 'Satoshi', 'Inter', system-ui, sans-serif;
+
+  --bezel: clamp(8px, 1.2vw, 13px);
+  --screen-radius: 38px;
+
+  /* iOS icons are a superellipse; 22.4% is the standard CSS approximation. */
+  --squircle: 22.4%;
+
+  /*
+   * Liquid glass. The material is four things stacked: a blurred, saturated
+   * backdrop; a faint tint so it reads as a surface; a bright specular rim on
+   * the light-facing edges; and a soft lift shadow. The rim is what sells it —
+   * blur alone just looks like frosted plastic.
+   */
+  --glass-tint: rgba(255, 255, 255, 0.1);
+  --glass-blur: blur(28px) saturate(190%) brightness(1.06);
+  --glass-rim:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 1px 0 0 rgba(255, 255, 255, 0.18),
+    inset -1px 0 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  --glass-lift: 0 12px 34px -14px rgba(0, 0, 0, 0.72);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--bone);
+  background: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------------------------------------------------------------- stage -- */
+
+.stage {
+  position: relative;
+  display: grid;
+  /* An `auto` track sizes to max-content, which lets the icon grid dictate the
+     device width. The screen must clip its content, never be widened by it. */
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+  min-height: 100dvh;
+  padding: clamp(1rem, 4vh, 3rem) 1rem;
+  overflow: hidden;
+}
+
+.stage__glow {
+  position: absolute;
+  inset: -20%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 40rem at 78% 8%, rgba(201, 123, 60, 0.3), transparent 62%),
+    radial-gradient(48rem 38rem at 12% 88%, rgba(232, 176, 75, 0.16), transparent 58%),
+    radial-gradient(70rem 50rem at 50% 50%, rgba(32, 28, 24, 0.95), var(--ink) 72%);
+}
+
+/* --------------------------------------------------------------- device -- */
+
+.device {
+  position: relative;
+  z-index: 1;
+  width: min(390px, 100%);
+  aspect-ratio: 9 / 19.2;
+  max-height: min(88dvh, 820px);
+  padding: var(--bezel);
+  border-radius: calc(var(--screen-radius) + var(--bezel));
+  background: linear-gradient(150deg, #2e2925, #0f0d0b 55%, #262119);
+  box-shadow:
+    0 0 0 1px rgba(236, 229, 216, 0.1),
+    0 2px 1px rgba(236, 229, 216, 0.07) inset,
+    0 50px 90px -30px rgba(0, 0, 0, 0.9);
+}
+
+.device__screen {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border-radius: var(--screen-radius);
+  background: var(--ink);
+  touch-action: pan-y;
+}
+
+/* Icons need something to sit on — a real wallpaper, not a dark void. */
+.wallpaper {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  /* Glass only reads as glass when there is colour behind it to bend. */
+  background:
+    radial-gradient(18rem 15rem at 84% 2%, rgba(255, 141, 48, 0.85), transparent 58%),
+    radial-gradient(17rem 19rem at 4% 20%, rgba(168, 66, 158, 0.7), transparent 62%),
+    radial-gradient(20rem 16rem at 92% 42%, rgba(232, 176, 75, 0.5), transparent 60%),
+    radial-gradient(24rem 20rem at 44% 104%, rgba(96, 62, 176, 0.6), transparent 64%),
+    radial-gradient(14rem 14rem at 20% 62%, rgba(201, 123, 60, 0.45), transparent 62%),
+    linear-gradient(168deg, #33241a 0%, #191110 48%, #0b0a08 100%);
+}
+
+/* Toggled from Settings — proof the switches actually drive the OS. */
+.wallpaper.is-plain {
+  background: linear-gradient(168deg, #241c16 0%, #131010 55%, #0b0a08 100%);
+}
+
+/* ------------------------------------------------------------ statusbar -- */
+
+.statusbar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1.5rem 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  user-select: none;
+  color: #fff;
+}
+
+.statusbar__time {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+.statusbar__notch {
+  width: 26%;
+  height: 22px;
+  margin-top: -0.5rem;
+  border-radius: 0 0 14px 14px;
+  background: #000;
+}
+
+.statusbar__right {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.statusbar__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #6ee07a;
+  box-shadow: 0 0 0 0 rgba(110, 224, 122, 0.6);
+  animation: pulse 2.6s ease-out infinite;
+}
+
+@keyframes pulse {
+  70%,
+  100% {
+    box-shadow: 0 0 0 7px rgba(110, 224, 122, 0);
+  }
+}
+
+/* ---------------------------------------------------------- springboard -- */
+
+.springboard {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/*
+ * The track width is page-count × 100%, driven by --page-count (set in JS once
+ * the icon grid is chunked into pages). Left to content sizing it resolves to
+ * max-content and drags the whole device wider than the viewport.
+ */
+.pages {
+  --page-count: 2;
+  display: flex;
+  width: calc(var(--page-count) * 100%);
+  height: 100%;
+  will-change: transform;
+}
+
+.page {
+  flex: 0 0 calc(100% / var(--page-count));
+  min-width: 0;
+  padding: 1.1rem 1.55rem 0;
+  overflow: hidden;
+}
+
+.widget {
+  padding: 1.15rem 1.25rem 1.25rem;
+  margin-bottom: 1.9rem;
+  border-radius: 26px;
+  background: var(--glass-tint);
+  border: 0;
+  box-shadow: var(--glass-rim), var(--glass-lift);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.widget__label {
+  margin: 0;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.66);
+}
+
+.widget__figure {
+  margin: 0.25rem 0 0.85rem;
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: #fff;
+}
+
+.widget__figure span {
+  font-size: 1.05rem;
+  letter-spacing: 0;
+  color: var(--amber);
+}
+
+.widget__stats {
+  display: flex;
+  gap: 1.8rem;
+  margin: 0;
+  padding-top: 0.8rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.widget__stats dt {
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.widget__stats dd {
+  margin: 0.2rem 0 0;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.7rem 1.05rem;
+}
+
+/* ----------------------------------------------------------------- icon -- */
+
+.app-icon {
+  display: flex;
+  flex-direction: column;
+  gap: 0.42rem;
+  align-items: center;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/*
+ * iOS icon: saturated gradient field, white symbol, a hairline of light on
+ * the top edge and a soft drop shadow. Not a dark tile with a colored stroke.
+ */
+.app-icon__tile {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  color: #fff;
+  border-radius: var(--squircle);
+  background: linear-gradient(165deg, var(--tint-a), var(--tint-b));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.62),
+    inset 1px 0 0 rgba(255, 255, 255, 0.2),
+    inset -1px 0 0 rgba(255, 255, 255, 0.16),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+    0 6px 14px -8px rgba(0, 0, 0, 0.6);
+  will-change: transform;
+}
+
+/* Specular sheen — a tight highlight top-left, falling off fast. */
+.app-icon__tile::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+  pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 18% -10%, rgba(255, 255, 255, 0.5), transparent 58%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 46%);
+}
+
+.app-icon__tile svg {
+  width: 48%;
+  height: 48%;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.25));
+}
+
+/* Full-bleed icon art paints its own field, so drop the hue gradient and
+   let the artwork run edge to edge under the glass rim. */
+.app-icon__tile--art,
+.dock__tile--art,
+.app__mark--art {
+  background: none;
+}
+
+.icon-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: none;
+}
+
+.app-icon__tile--art .icon-art,
+.dock__tile--art .icon-art,
+.app__mark--art .icon-art {
+  width: 100%;
+  height: 100%;
+}
+
+.app-icon__tile b {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.app-icon__label {
+  /* Two lines max, fixed box, so a long client name can't shift its row. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  min-height: 2.2em;
+  overflow: hidden;
+  font-size: 0.6rem;
+  font-weight: 450;
+  line-height: 1.18;
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+
+.app-icon:focus-visible .app-icon__tile,
+.dock__item:focus-visible,
+.app__back:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+/* ------------------------------------------------------------- pagedots -- */
+
+.pagedots {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: none;
+  gap: 0.45rem;
+  justify-content: center;
+  padding: 0.5rem 0 0.7rem;
+}
+
+.pagedots button {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.34);
+  border: 0;
+  border-radius: 50%;
+  transition: background 0.25s ease;
+}
+
+.pagedots button[aria-selected='true'] {
+  background: #fff;
+}
+
+/* ----------------------------------------------------------------- dock -- */
+
+.dock {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: none;
+  gap: 0.85rem;
+  justify-content: center;
+  margin: 0 1.1rem 0.35rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 32px;
+  background: var(--glass-tint);
+  border: 0;
+  box-shadow: var(--glass-rim), var(--glass-lift);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.dock__item {
+  flex: 1;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-radius: var(--squircle);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The tile carries the visual so press-scaling doesn't fight the flex track. */
+.dock__tile {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  /* Full-bleed icon art escapes the radius without this. */
+  overflow: hidden;
+  color: #fff;
+  border-radius: var(--squircle);
+  background: linear-gradient(165deg, var(--tint-a), var(--tint-b));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+    0 6px 14px -7px rgba(0, 0, 0, 0.72);
+  will-change: transform;
+}
+
+.dock__tile svg {
+  width: 46%;
+  height: 46%;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.25));
+}
+
+/* -------------------------------------------------------------- homebar -- */
+
+/* z-index 5 keeps this above the app panel — this is the way home. */
+.homebar {
+  position: relative;
+  z-index: 5;
+  display: grid;
+  flex: none;
+  place-items: center;
+  height: 28px;
+}
+
+.homebar__line {
+  /* Decorative — must never swallow the tap meant for the hit area. */
+  pointer-events: none;
+  width: 36%;
+  height: 5px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.55);
+  transition:
+    background 0.25s ease,
+    transform 0.25s ease;
+}
+
+.homebar__hit {
+  position: absolute;
+  inset: -14px 22%;
+  font: inherit;
+  color: transparent;
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+.homebar__hit:not([hidden]) ~ .homebar__line {
+  background: #fff;
+}
+
+/* --------------------------------------------------------- control center -- */
+
+.cc {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  justify-content: center;
+  padding-top: 3.4rem;
+  background: rgba(6, 5, 4, 0);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.3s ease,
+    background 0.3s ease;
+}
+
+.cc.is-open {
+  opacity: 1;
+  background: rgba(6, 5, 4, 0.35);
+  pointer-events: auto;
+}
+
+.cc__sheet {
+  width: calc(100% - 2.2rem);
+  max-width: 340px;
+  height: fit-content;
+  padding: 0.85rem 1.15rem 1.3rem;
+  background: var(--glass-tint);
+  border-radius: 26px;
+  box-shadow: var(--glass-rim), var(--glass-lift);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  transform: translateY(-650px);
+  will-change: transform;
+  user-select: none;
+}
+
+.cc__grabber {
+  display: block;
+  width: 34px;
+  height: 4px;
+  margin: 0 auto 0.9rem;
+  border-radius: 999px;
+  background: rgba(236, 229, 216, 0.25);
+}
+
+.cc__toggles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  margin-bottom: 0.85rem;
+}
+
+.cc__toggle {
+  display: grid;
+  gap: 0.4rem;
+  place-items: center;
+  padding: 0.85rem 0.4rem;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.07);
+  border: 0;
+  border-radius: 18px;
+  transition: background 0.2s ease;
+}
+
+.cc__toggle-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: rgba(236, 229, 216, 0.6);
+}
+
+.cc__toggle-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.cc__toggle-label {
+  font-size: 0.6rem;
+  color: rgba(236, 229, 216, 0.55);
+}
+
+.cc__toggle[aria-pressed='true'] {
+  background: var(--amber);
+}
+
+.cc__toggle[aria-pressed='true'] .cc__toggle-icon,
+.cc__toggle[aria-pressed='true'] .cc__toggle-label {
+  color: #1a1305;
+}
+
+.cc__slider {
+  padding: 0.75rem 0.9rem 0.85rem;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 18px;
+}
+
+.cc__slider-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.68rem;
+  color: rgba(236, 229, 216, 0.7);
+}
+
+.cc__slider-val {
+  font-variant-numeric: tabular-nums;
+  color: rgba(236, 229, 216, 0.45);
+}
+
+.cc__range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(236, 229, 216, 0.2);
+  outline: none;
+}
+
+.cc__range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+.cc__range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+[data-theme='light'] .cc__toggle {
+  background: rgba(23, 19, 15, 0.06);
+}
+
+[data-theme='light'] .cc__toggle-icon,
+[data-theme='light'] .cc__toggle-label {
+  color: rgba(23, 19, 15, 0.6);
+}
+
+[data-theme='light'] .cc__slider {
+  background: rgba(23, 19, 15, 0.06);
+}
+
+[data-theme='light'] .cc__slider-head {
+  color: rgba(23, 19, 15, 0.65);
+}
+
+[data-theme='light'] .cc__slider-val {
+  color: rgba(23, 19, 15, 0.42);
+}
+
+[data-theme='light'] .cc__range {
+  background: rgba(23, 19, 15, 0.15);
+}
+
+[data-theme='light'] .cc__grabber {
+  background: rgba(23, 19, 15, 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------------ app -- */
+
+.app[hidden] {
+  display: none;
+}
+
+.app {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--screen-radius);
+  /* A glass sheet, not an opaque panel — the wallpaper stays visible through
+     it. The dark tint is what keeps long-form case-study copy legible. */
+  background:
+    radial-gradient(26rem 20rem at 85% -8%, color-mix(in srgb, var(--tint-a) 55%, transparent), transparent 62%),
+    rgba(11, 10, 8, 0.72);
+  backdrop-filter: blur(34px) saturate(180%);
+  -webkit-backdrop-filter: blur(34px) saturate(180%);
+  will-change: transform;
+}
+
+.app__chrome {
+  display: flex;
+  flex: none;
+  gap: 0.7rem;
+  align-items: center;
+  padding: 2.9rem 1.3rem 0.9rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent);
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.app__back {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: #fff;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.12);
+  border: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.app__back svg {
+  width: 16px;
+  height: 16px;
+}
+
+.app__mark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: #fff;
+  border-radius: var(--squircle);
+  background: linear-gradient(165deg, var(--tint-a), var(--tint-b));
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset;
+}
+
+.app__mark {
+  overflow: hidden;
+}
+
+.app__mark svg {
+  width: 48%;
+  height: 48%;
+}
+
+.app__mark b {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.app__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  outline: none;
+}
+
+.app__body {
+  flex: 1;
+  min-height: 0;
+  /* The panel is inset:0, so the home bar floats over its last line —
+     reserve room for it plus the iOS safe area. */
+  padding: 1.15rem 1.3rem calc(3.6rem + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Safari runs its own chrome and scroller, so it takes the full box. */
+.app__body--flush {
+  padding: 0 0 calc(1.6rem + env(safe-area-inset-bottom));
+  overflow: hidden;
+}
+
+.app__blurb {
+  margin: 0 0 1.5rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: rgba(236, 229, 216, 0.95);
+}
+
+.app__heading {
+  margin: 1.6rem 0 0.7rem;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(236, 229, 216, 0.45);
+}
+
+.app__heading:first-child {
+  margin-top: 0;
+}
+
+.app__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app__list li {
+  position: relative;
+  padding: 0.6rem 0 0.6rem 1.1rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: rgba(236, 229, 216, 0.78);
+  border-bottom: 1px solid var(--line);
+}
+
+.app__list li::before {
+  position: absolute;
+  top: 0.95rem;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  content: '';
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.app__p {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: rgba(236, 229, 216, 0.78);
+}
+
+.app__metric {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+  padding: 1rem 0;
+  margin-bottom: 0.4rem;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.app__metric strong {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.app__metric span {
+  font-size: 0.76rem;
+  line-height: 1.35;
+  color: rgba(236, 229, 216, 0.6);
+}
+
+.app__quote {
+  padding: 1rem 0 0;
+  margin: 1.4rem 0 0;
+  border-top: 1px solid var(--line);
+}
+
+.app__quote p {
+  margin: 0 0 0.7rem;
+  font-family: var(--font-display);
+  font-size: 0.98rem;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--bone);
+}
+
+.app__quote footer {
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  color: rgba(236, 229, 216, 0.5);
+}
+
+.app__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0;
+  margin: 0 0 0.4rem;
+  list-style: none;
+}
+
+.app__tags li {
+  padding: 0.3rem 0.62rem;
+  font-size: 0.66rem;
+  color: rgba(236, 229, 216, 0.72);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+/* The bezel is a desktop conceit — on a phone this is just the phone. */
+@media (max-width: 560px) {
+  .stage {
+    padding: 0;
+  }
+
+  .device {
+    width: 100%;
+    height: 100dvh;
+    max-height: none;
+    padding: 0;
+    aspect-ratio: auto;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .device__screen,
+  .app {
+    border-radius: 0;
+  }
+
+  .statusbar {
+    padding-top: max(0.8rem, env(safe-area-inset-top));
+  }
+
+  .homebar {
+    height: max(28px, calc(env(safe-area-inset-bottom) + 12px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .statusbar__dot {
+    animation: none;
+  }
+}
+
+/* ============================================================== light -- */
+
+/*
+ * Light appearance. Only the surface layer flips: the wallpaper goes pale, the
+ * glass tint inverts from white-on-dark to white-on-light, and the rim moves
+ * from a bright specular edge to a soft shadow edge — bright rims read as
+ * glass on dark, but as haze on light.
+ */
+[data-theme='light'] {
+  --glass-tint: rgba(255, 255, 255, 0.6);
+  --glass-blur: blur(30px) saturate(180%) brightness(1.02);
+  --glass-rim:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(20, 16, 12, 0.07),
+    inset 0 -1px 0 rgba(20, 16, 12, 0.05);
+  --glass-lift: 0 12px 30px -16px rgba(60, 40, 20, 0.45);
+  --line: rgba(24, 20, 16, 0.12);
+}
+
+[data-theme='light'] .wallpaper {
+  background:
+    radial-gradient(18rem 15rem at 84% 2%, rgba(255, 186, 120, 0.95), transparent 60%),
+    radial-gradient(17rem 19rem at 4% 20%, rgba(226, 168, 220, 0.85), transparent 62%),
+    radial-gradient(20rem 16rem at 92% 42%, rgba(255, 224, 158, 0.8), transparent 60%),
+    radial-gradient(24rem 20rem at 44% 104%, rgba(178, 160, 240, 0.8), transparent 64%),
+    linear-gradient(168deg, #fdf3e6 0%, #f6ece2 48%, #efe6dc 100%);
+}
+
+[data-theme='light'] .wallpaper.is-plain {
+  background: linear-gradient(168deg, #f8f1e8 0%, #f2ebe3 55%, #ece4da 100%);
+}
+
+[data-theme='light'] .statusbar,
+[data-theme='light'] .widget__figure,
+[data-theme='light'] .widget__stats dd {
+  color: #17130f;
+}
+
+[data-theme='light'] .statusbar__right,
+[data-theme='light'] .widget__label,
+[data-theme='light'] .widget__stats dt {
+  color: rgba(23, 19, 15, 0.62);
+}
+
+[data-theme='light'] .statusbar__notch {
+  background: #17130f;
+}
+
+[data-theme='light'] .app-icon__label {
+  color: #17130f;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.65);
+}
+
+[data-theme='light'] .pagedots button {
+  background: rgba(23, 19, 15, 0.28);
+}
+
+[data-theme='light'] .pagedots button[aria-selected='true'] {
+  background: #17130f;
+}
+
+[data-theme='light'] .homebar__line {
+  background: rgba(23, 19, 15, 0.45);
+}
+
+[data-theme='light'] .homebar__hit:not([hidden]) ~ .homebar__line {
+  background: #17130f;
+}
+
+/* Sheets and their contents */
+[data-theme='light'] .app {
+  background:
+    radial-gradient(26rem 20rem at 85% -8%, color-mix(in srgb, var(--tint-a) 40%, transparent), transparent 62%),
+    rgba(252, 249, 245, 0.82);
+}
+
+[data-theme='light'] .app__title,
+[data-theme='light'] .app__blurb,
+[data-theme='light'] .nt__title,
+[data-theme='light'] .nt__note h3,
+[data-theme='light'] .app__quote p,
+[data-theme='light'] .ph__caption strong,
+[data-theme='light'] .mu__title,
+[data-theme='light'] .cal__month,
+[data-theme='light'] .ph__header,
+[data-theme='light'] .mu__meta b {
+  color: #17130f;
+}
+
+[data-theme='light'] .app__p,
+[data-theme='light'] .app__list li,
+[data-theme='light'] .nt__note p,
+[data-theme='light'] .app__tags li,
+[data-theme='light'] .sf__url,
+[data-theme='light'] .cal__grid button,
+[data-theme='light'] .cal__times button,
+[data-theme='light'] .cal__confirm p,
+[data-theme='light'] .ml__row input,
+[data-theme='light'] .ml textarea,
+[data-theme='light'] .ml__sent p,
+[data-theme='light'] .st__list li,
+[data-theme='light'] .mu__meta em {
+  color: rgba(23, 19, 15, 0.78);
+}
+
+[data-theme='light'] .app__heading,
+[data-theme='light'] .nt__preview,
+[data-theme='light'] .nt__stamp,
+[data-theme='light'] .sf__count,
+[data-theme='light'] .nt__header,
+[data-theme='light'] .st__group,
+[data-theme='light'] .st__note,
+[data-theme='light'] .cal__hint,
+[data-theme='light'] .cal__tz,
+[data-theme='light'] .cal__dow span,
+[data-theme='light'] .cal__heading,
+[data-theme='light'] .cal__confirm small,
+[data-theme='light'] .ml__row label,
+[data-theme='light'] .ml__sent small,
+[data-theme='light'] .ph__caption,
+[data-theme='light'] .mu__note,
+[data-theme='light'] .st__list em {
+  color: rgba(23, 19, 15, 0.5);
+}
+
+[data-theme='light'] .cal__grid button[disabled] {
+  color: rgba(23, 19, 15, 0.22);
+}
+
+[data-theme='light'] .cal__times button {
+  background: rgba(23, 19, 15, 0.06);
+}
+
+[data-theme='light'] .ml__row input::placeholder,
+[data-theme='light'] .ml textarea::placeholder {
+  color: rgba(23, 19, 15, 0.32);
+}
+
+[data-theme='light'] .app__back {
+  color: #17130f;
+  background: rgba(23, 19, 15, 0.08);
+}
+
+[data-theme='light'] .app__chrome {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent);
+  box-shadow: inset 0 -1px 0 rgba(23, 19, 15, 0.1);
+}
+
+[data-theme='light'] .sf__toolbar button {
+  color: rgba(23, 19, 15, 0.8);
+}
+
+[data-theme='light'] .st__switch {
+  background: rgba(23, 19, 15, 0.18);
+}
+
+/* ============================================================== today -- */
+
+.widget__lede {
+  margin: 0.5rem 0 1rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme='light'] .widget__lede {
+  color: rgba(23, 19, 15, 0.85);
+}
+
+.today {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+}
+
+.tw {
+  padding: 1rem 1.05rem 1.15rem;
+  border-radius: 24px;
+  background: var(--glass-tint);
+  box-shadow: var(--glass-rim), var(--glass-lift);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.tw__label {
+  margin: 0;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.tw__big {
+  margin: 0.4rem 0 0.2rem;
+  font-family: var(--font-display);
+  font-size: 2.3rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+
+.tw__sub {
+  margin: 0;
+  font-size: 0.66rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+[data-theme='light'] .tw__big {
+  color: #17130f;
+}
+
+[data-theme='light'] .tw__label,
+[data-theme='light'] .tw__sub {
+  color: rgba(23, 19, 15, 0.6);
+}
+
+/* Clock icon hands: one keyframe, three speeds, offset by negative delay. */
+@keyframes ck-sweep {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ck-hand {
+  transform-origin: 50px 50px;
+  animation: ck-sweep var(--dur) linear infinite;
+  animation-delay: var(--at);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ck-hand {
+    animation-play-state: paused;
+  }
+}

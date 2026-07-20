@@ -1,6 +1,6 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { splitWords, prefersReducedMotion } from './utils.js';
+import { splitWords, prefersReducedMotion, scrambleText } from './utils.js';
 
 /* ---------- hero intro (runs after preloader) ---------- */
 export function heroIntro(gl) {
@@ -97,9 +97,10 @@ export function initManifesto() {
 export function initStats() {
   document.querySelectorAll('[data-count]').forEach((el) => {
     const target = parseFloat(el.dataset.count);
+    const prefix = el.dataset.prefix || '';
     const suffix = el.dataset.suffix || '';
     if (prefersReducedMotion()) {
-      el.textContent = target + suffix;
+      el.textContent = prefix + target + suffix;
       return;
     }
     const obj = { v: 0 };
@@ -108,7 +109,7 @@ export function initStats() {
       duration: 1.8,
       ease: 'power3.out',
       scrollTrigger: { trigger: el, start: 'top 85%' },
-      onUpdate: () => (el.textContent = Math.round(obj.v) + suffix),
+      onUpdate: () => (el.textContent = prefix + Math.round(obj.v) + suffix),
     });
   });
 }
@@ -227,6 +228,53 @@ export function initReveals() {
     ease: 'power3.out',
     scrollTrigger: { trigger: '.footer', start: 'top 90%' },
   });
+
+  const pageTitle = document.querySelector('[data-page-title]');
+  if (pageTitle) {
+    const words = splitWords(pageTitle);
+    gsap.set(words, { yPercent: 115 });
+    gsap.to(words, {
+      yPercent: 0,
+      duration: 1.1,
+      ease: 'power4.out',
+      stagger: 0.08,
+      scrollTrigger: { trigger: pageTitle, start: 'top 90%' },
+    });
+  }
+}
+
+/* ---------- generic block reveal (about/services/contact/work-detail) ---------- */
+export function initRevealBlocks(selector = '[data-reveal-block]') {
+  if (prefersReducedMotion()) return;
+  document.querySelectorAll(selector).forEach((block) => {
+    gsap.from(block.children, {
+      y: 50,
+      opacity: 0,
+      duration: 1,
+      ease: 'power3.out',
+      stagger: 0.12,
+      scrollTrigger: { trigger: block, start: 'top 78%' },
+    });
+  });
+}
+
+/* ---------- eyebrow scramble-in (secondary-page heroes) ---------- */
+export function initScrambleEyebrow(selector = '[data-scramble-eyebrow]') {
+  const eyebrow = document.querySelector(selector);
+  if (!eyebrow || prefersReducedMotion()) return;
+  const label = eyebrow.lastChild;
+  if (!label) return;
+  const text = label.textContent.trim();
+  const span = document.createElement('span');
+  span.textContent = text;
+  label.replaceWith(span);
+  setTimeout(() => scrambleText(span, { duration: 0.7 }), 300);
+}
+
+/* ---------- footer year ---------- */
+export function setFooterYear() {
+  const year = document.querySelector('[data-year]');
+  if (year) year.textContent = new Date().getFullYear();
 }
 
 /* ---------- contact form ---------- */
@@ -272,7 +320,4 @@ export function initContactForm() {
       button.disabled = false;
     }
   });
-
-  const year = document.querySelector('[data-year]');
-  if (year) year.textContent = new Date().getFullYear();
 }

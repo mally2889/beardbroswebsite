@@ -3,6 +3,7 @@ import {
   Scene,
   OrthographicCamera,
   Vector2,
+  Vector3,
   Mesh,
   PlaneGeometry,
   ShaderMaterial,
@@ -16,6 +17,10 @@ const frag = /* glsl */ `
   uniform vec2 uRes;
   uniform vec2 uMouse;
   uniform float uIntro;
+  uniform float uPull;
+  uniform vec3 uInk;
+  uniform vec3 uCopper;
+  uniform vec3 uAmber;
 
   // --- simplex-style value noise + fbm ---
   vec2 hash(vec2 p) {
@@ -55,7 +60,7 @@ const frag = /* glsl */ `
     vec2 m = uMouse;
     m.x *= uRes.x / uRes.y;
     float md = length(p - m);
-    vec2 pull = normalize(p - m + 0.0001) * exp(-md * 2.4) * 0.35;
+    vec2 pull = normalize(p - m + 0.0001) * exp(-md * 2.4) * 0.35 * uPull;
 
     // domain-warped fbm smoke
     vec2 q = vec2(fbm(p * 1.4 + t), fbm(p * 1.4 - t * 0.7));
@@ -63,16 +68,12 @@ const frag = /* glsl */ `
     float f = fbm(p * 2.0 + r * 1.9 - pull * 2.0);
 
     // palette: deep ink -> ember copper -> amber highlights
-    vec3 ink = vec3(0.043, 0.039, 0.031);
-    vec3 copper = vec3(0.788, 0.482, 0.235);
-    vec3 amber = vec3(0.910, 0.690, 0.294);
-
     float glow = smoothstep(0.15, 0.85, f);
-    vec3 col = mix(ink, copper * 0.55, glow);
-    col = mix(col, amber * 0.85, smoothstep(0.55, 0.95, f) * 0.7);
+    vec3 col = mix(uInk, uCopper * 0.55, glow);
+    col = mix(col, uAmber * 0.85, smoothstep(0.55, 0.95, f) * 0.7);
 
     // ember hotspot around the mouse
-    col += amber * exp(-md * 3.2) * 0.12;
+    col += uAmber * exp(-md * 3.2) * 0.12 * uPull;
 
     // vignette
     float vig = smoothstep(1.25, 0.35, length(uv - 0.5));
@@ -89,15 +90,30 @@ const vert = /* glsl */ `
   void main() { gl_Position = vec4(position, 1.0); }
 `;
 
-/** Full-viewport shader hero. Pauses off-screen and on hidden tabs. */
-export function initHeroGL() {
-  const holder = document.querySelector('[data-hero-gl]');
+const hexToVec3 = (hex) => {
+  const n = parseInt(hex.replace('#', ''), 16);
+  return new Vector3(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255);
+};
+
+/**
+ * Mounts a full-bleed domain-warped smoke shader inside `holder`. Reusable
+ * across pages with different tints so each secondary hero can carry its
+ * own mood without duplicating the GLSL. Pauses off-screen and on hidden
+ * tabs; falls back to a static CSS gradient with no WebGL / reduced motion.
+ */
+export function createShaderField(holder, opts = {}) {
   if (!holder) return null;
+
+  const ink = opts.ink || '#0b0a08';
+  const copper = opts.copper || '#c97b3c';
+  const amber = opts.amber || '#e8b04b';
+  const pull = opts.mouseReactive === false ? 0.3 : 1;
 
   if (prefersReducedMotion()) {
     holder.style.background =
-      'radial-gradient(80% 90% at 30% 20%, rgba(201,123,60,0.28), transparent 60%),' +
-      'radial-gradient(60% 70% at 80% 80%, rgba(232,176,75,0.14), transparent 60%), #0b0a08';
+      opts.fallback ||
+      `radial-gradient(80% 90% at 30% 20%, ${copper}48, transparent 60%),` +
+        `radial-gradient(60% 70% at 80% 80%, ${amber}24, transparent 60%), ${ink}`;
     return null;
   }
 
@@ -118,6 +134,10 @@ export function initHeroGL() {
     uRes: { value: new Vector2(1, 1) },
     uMouse: { value: new Vector2(0.5, 0.5) },
     uIntro: { value: 0 },
+    uPull: { value: pull },
+    uInk: { value: hexToVec3(ink) },
+    uCopper: { value: hexToVec3(copper) },
+    uAmber: { value: hexToVec3(amber) },
   };
   scene.add(
     new Mesh(
@@ -128,24 +148,30 @@ export function initHeroGL() {
 
   const resize = () => {
     const { clientWidth: w, clientHeight: h } = holder;
+    if (!w || !h) return;
     renderer.setSize(w, h, false);
     uniforms.uRes.value.set(w * renderer.getPixelRatio(), h * renderer.getPixelRatio());
   };
   resize();
-  window.addEventListener('resize', resize);
+  const ro = new ResizeObserver(resize);
+  ro.observe(holder);
 
   const mouse = { x: 0.5, y: 0.5, tx: 0.5, ty: 0.5 };
-  window.addEventListener('pointermove', (e) => {
-    mouse.tx = e.clientX / innerWidth;
-    mouse.ty = 1 - e.clientY / innerHeight;
-  });
+  const onMove = (e) => {
+    const r = holder.getBoundingClientRect();
+    mouse.tx = (e.clientX - r.left) / r.width;
+    mouse.ty = 1 - (e.clientY - r.top) / r.height;
+  };
+  window.addEventListener('pointermove', onMove);
 
   let visible = true;
-  new IntersectionObserver(([entry]) => (visible = entry.isIntersecting)).observe(holder);
+  const io = new IntersectionObserver(([entry]) => (visible = entry.isIntersecting));
+  io.observe(holder);
 
   const clock = new Clock();
+  let raf;
   const tick = () => {
-    requestAnimationFrame(tick);
+    raf = requestAnimationFrame(tick);
     if (!visible || document.hidden) return;
     mouse.x = lerp(mouse.x, mouse.tx, 0.05);
     mouse.y = lerp(mouse.y, mouse.ty, 0.05);
@@ -156,7 +182,7 @@ export function initHeroGL() {
   tick();
 
   return {
-    /** fade the shader in during the hero intro */
+    /** fade the shader in during the page's hero intro */
     reveal(duration = 2) {
       const start = performance.now();
       const step = (now) => {
@@ -166,5 +192,18 @@ export function initHeroGL() {
       };
       requestAnimationFrame(step);
     },
+    destroy() {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      io.disconnect();
+      window.removeEventListener('pointermove', onMove);
+      renderer.dispose();
+      holder.removeChild(renderer.domElement);
+    },
   };
+}
+
+/** The homepage's full-viewport hero field, in its original palette. */
+export function initHeroGL() {
+  return createShaderField(document.querySelector('[data-hero-gl]'));
 }

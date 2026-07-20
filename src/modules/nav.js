@@ -1,11 +1,11 @@
 import gsap from 'gsap';
-import { prefersReducedMotion } from './utils.js';
+import { prefersReducedMotion, scrambleText, isTouch } from './utils.js';
 
 /**
  * Floating pill nav with intelligent hide/show, plus the fullscreen menu
  * that blooms open from the toggle with a circular clip-path.
  */
-export function initNav(lenis) {
+export function initNav(lenis, transitions) {
   const nav = document.querySelector('[data-nav]');
   const toggle = document.querySelector('[data-menu-toggle]');
   const menu = document.querySelector('[data-menu]');
@@ -80,10 +80,26 @@ export function initNav(lenis) {
   toggle.addEventListener('click', () => setOpen(!open));
   window.addEventListener('keydown', (e) => e.key === 'Escape' && setOpen(false));
 
-  // menu links: close first, then let the lenis anchor handler take over
+  // menu links: close first. Same-page anchors fall through to the lenis
+  // anchor handler; links to other pages go out through the veil instead.
   menu.querySelectorAll('[data-menu-link]').forEach((a) => {
-    a.addEventListener('click', () => setOpen(false));
+    a.addEventListener('click', (e) => {
+      setOpen(false);
+      const url = new URL(a.href, location.href);
+      const samePageAnchor = url.pathname === location.pathname && url.hash;
+      if (transitions && !samePageAnchor) {
+        e.preventDefault();
+        transitions.leave(a.href);
+      }
+    });
   });
 
   gsap.set(words, { y: '115%' });
+
+  /* --- menu link hover: scramble the word before it settles --- */
+  if (!reduced && !isTouch()) {
+    words.forEach((word) => {
+      word.addEventListener('pointerenter', () => scrambleText(word, { duration: 0.45 }));
+    });
+  }
 }

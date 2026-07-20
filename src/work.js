@@ -7,12 +7,39 @@ import { initMagnetic } from './modules/magnetic.js';
 import { initTransitions } from './modules/transitions.js';
 import { getProject, nextProject } from './data/projects.js';
 import { splitWords, prefersReducedMotion } from './modules/utils.js';
+import { setFooterYear, initRevealBlocks } from './modules/sections.js';
 
 const slug = new URLSearchParams(location.search).get('p') || 'beardo';
 const p = getProject(slug);
 const next = nextProject(p.slug);
+const canonicalUrl = `https://beardbros.in/work.html?p=${p.slug}`;
 
-document.title = `${p.name} — Case Study — Beard Bros`;
+document.title = `${p.name} Case Study — ${p.category} — Beard Bros`;
+
+/* ---------- per-case-study meta + structured data ---------- */
+const metaDescription = `${p.tagline} How Beard Bros helped ${p.name} — ${p.category.toLowerCase()} — with ${p.services.join(', ').toLowerCase()}.`.slice(0, 300);
+document.querySelector('meta[name="description"]')?.setAttribute('content', metaDescription);
+document.querySelector('link[rel="canonical"]')?.setAttribute('href', canonicalUrl);
+[
+  ['property', 'og:title', `${p.name} — Case Study — Beard Bros`],
+  ['property', 'og:description', metaDescription],
+  ['property', 'og:url', canonicalUrl],
+].forEach(([attr, value, content]) => {
+  document.querySelector(`meta[${attr}="${value}"]`)?.setAttribute('content', content);
+});
+
+const ld = document.createElement('script');
+ld.type = 'application/ld+json';
+ld.textContent = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'CreativeWork',
+  name: `${p.name} — ${p.tagline}`,
+  url: canonicalUrl,
+  about: p.category,
+  creator: { '@type': 'Organization', name: 'Beard Bros', url: 'https://beardbros.in' },
+  description: metaDescription,
+});
+document.head.appendChild(ld);
 
 /* ---------- render ---------- */
 const root = document.querySelector('[data-cs-root]');
@@ -74,12 +101,10 @@ root.innerHTML = `
 /* ---------- behaviour ---------- */
 const lenis = initScroll();
 const transitions = initTransitions();
-initNav(lenis);
+initNav(lenis, transitions);
 initMagnetic();
 initCursor();
-
-const year = document.querySelector('[data-year]');
-if (year) year.textContent = new Date().getFullYear();
+setFooterYear();
 
 // veiled navigation for next-case and footer CTA
 document.querySelectorAll('[data-next-link], [data-cta-link]').forEach((a) => {
@@ -110,16 +135,7 @@ if (!prefersReducedMotion()) {
     scrollTrigger: { trigger: '.cs-hero', start: 'top top', end: 'bottom top', scrub: true },
   });
 
-  document.querySelectorAll('[data-cs-block]').forEach((block) => {
-    gsap.from(block.children, {
-      y: 50,
-      opacity: 0,
-      duration: 1,
-      ease: 'power3.out',
-      stagger: 0.12,
-      scrollTrigger: { trigger: block, start: 'top 78%' },
-    });
-  });
+  initRevealBlocks('[data-cs-block]');
 
   gsap.from('[data-cs-band] > *', {
     y: 30,

@@ -15,6 +15,7 @@ import {
   initMarquees,
   initReveals,
   initContactForm,
+  setFooterYear,
 } from './modules/sections.js';
 
 const lenis = initScroll();
@@ -25,7 +26,7 @@ const glReady = import('./modules/hero-gl.js')
   .then((m) => m.initHeroGL())
   .catch(() => null);
 
-initNav(lenis);
+initNav(lenis, transitions);
 initServices();
 initWorkGallery((href) => transitions.leave(href));
 initManifesto();
@@ -35,6 +36,7 @@ initMarquees(lenis);
 initReveals();
 initContactForm();
 initMagnetic();
+setFooterYear();
 
 const rebindCursor = initCursor();
 rebindCursor?.();
