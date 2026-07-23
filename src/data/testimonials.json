@@ -1,0 +1,34 @@
+{
+  "testimonials": [
+    {
+      "author": "Ashutosh Valani",
+      "role": "Co-founder, Beardo",
+      "quote": "They didn’t just run our campaigns — they held the brand together while we scaled from three products to a category Marico wanted in on.",
+      "accent": "#e0603d"
+    },
+    {
+      "author": "Rishabh Chokhani",
+      "role": "Founder, Naturevibe Botanicals",
+      "quote": "What convinced me was how differently they treated the US and Indian buyer. Most agencies run one campaign everywhere. They understood these are two different customers entirely.",
+      "accent": "#3d8fe0"
+    },
+    {
+      "author": "Rahul Satia",
+      "role": "Founder, CelfieDesign",
+      "quote": "They speak like people who’ve actually run a P&L, not just a content calendar. That’s rarer than it should be in this industry.",
+      "accent": "#8f7ae8"
+    },
+    {
+      "author": "Richa Pendeke",
+      "role": "Nutrizoe",
+      "quote": "Every recommendation came with a reason I could check myself. I never once felt like I was being sold a tactic instead of a plan.",
+      "accent": "#e8b04b"
+    },
+    {
+      "author": "Subhasis Rath",
+      "role": "Prodigitaly",
+      "quote": "Straight answers, even when the honest answer was that something wasn’t working. That’s the only kind of agency relationship worth having.",
+      "accent": "#fc3158"
+    }
+  ]
+}

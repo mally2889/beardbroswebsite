@@ -16,9 +16,8 @@
   flex: none;
   gap: 0.4rem;
   align-items: center;
-  justify-content: center;
-  padding: 0.45rem 0.8rem;
-  margin: 0 0.75rem 0.6rem;
+  padding: 0.45rem 0.6rem 0.45rem 0.8rem;
+  margin: 0 0.75rem 0.4rem;
   font-size: 0.76rem;
   color: rgba(236, 229, 216, 0.85);
   background: rgba(255, 255, 255, 0.12);
@@ -30,31 +29,147 @@
 
 .sf__lock svg {
   display: block;
+  flex: none;
   width: 11px;
   height: 11px;
   opacity: 0.6;
 }
 
 .sf__url {
-  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 0.76rem;
+  color: inherit;
+  text-align: center;
   text-overflow: ellipsis;
+  background: none;
+  border: 0;
+  outline: none;
+}
+
+.sf__url:focus {
+  text-align: left;
+}
+
+.sf__go {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  color: rgba(236, 229, 216, 0.5);
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+.sf__go svg {
+  width: 14px;
+  height: 14px;
+}
+
+.sf__go:hover {
+  color: var(--amber);
+}
+
+/* A real Safari-style favourites bar — quick jumps into the site's own
+   sandboxed pages, same grammar as the real thing (a row of small named
+   shortcuts under the address bar). */
+.sf__bookmarks {
+  display: flex;
+  flex: none;
+  gap: 0.3rem;
+  overflow-x: auto;
+  padding: 0 0.9rem 0.6rem;
+  scrollbar-width: none;
+}
+
+.sf__bookmarks::-webkit-scrollbar {
+  display: none;
+}
+
+.sf__bookmarks button {
+  flex: none;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.66rem;
+  font-weight: 500;
+  color: rgba(236, 229, 216, 0.6);
   white-space: nowrap;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.06);
+  border: 0;
+  border-radius: 999px;
+}
+
+.sf__bookmarks button:hover {
+  color: var(--bone);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.sf__notfound {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.sf__notfound-title {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--bone);
+}
+
+.sf__notfound-sub {
+  margin: 0 0 1.4rem;
+  font-size: 0.8rem;
+  color: rgba(236, 229, 216, 0.5);
+}
+
+.sf__notfound-home {
+  padding: 0.5rem 1.1rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #1a1305;
+  cursor: pointer;
+  background: var(--amber);
+  border: 0;
+  border-radius: 999px;
+}
+
+[data-theme='light'] .sf__bookmarks button {
+  color: rgba(23, 19, 15, 0.55);
+  background: rgba(23, 19, 15, 0.05);
+}
+
+[data-theme='light'] .sf__bookmarks button:hover {
+  color: #17130f;
+  background: rgba(23, 19, 15, 0.1);
+}
+
+[data-theme='light'] .sf__notfound-title {
+  color: #17130f;
+}
+
+[data-theme='light'] .sf__notfound-sub {
+  color: rgba(23, 19, 15, 0.5);
 }
 
 .sf__view {
   flex: 1;
   min-height: 0;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
   padding: 0 0.75rem;
   overflow-y: auto;
   overscroll-behavior: contain;
-}
-
-.sf__count {
-  margin: 0 0 0.7rem;
-  font-size: 0.62rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(236, 229, 216, 0.42);
+  box-sizing: border-box;
 }
 
 .sf__tabs {
@@ -258,6 +373,16 @@
 .nt__back svg {
   width: 15px;
   height: 15px;
+}
+
+.nt__note {
+  /* Comfortable reading-line width regardless of how wide the window
+     actually is — a maximized desktop Safari window has no business
+     stretching prose out to ~1000px lines. No-op on a phone-width screen,
+     since it's already narrower than this cap. */
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .nt__note h3 {
@@ -1093,10 +1218,10 @@
   color: #17130f;
 }
 
-/* ---------------------------------------------------- safari bookmarks --- */
+/* ------------------------------------------------------- safari home --- */
 
-.bm__group {
-  margin: 1.2rem 0 0.45rem 0.2rem;
+.sf__section-label {
+  margin: 1.3rem 0 0.5rem 0.2rem;
   font-size: 0.58rem;
   font-weight: 600;
   letter-spacing: 0.16em;
@@ -1104,9 +1229,16 @@
   color: rgba(236, 229, 216, 0.4);
 }
 
-.bm__list {
+.sf__section-label:first-child {
+  margin-top: 0;
+}
+
+/* Reading List — Safari's real reading-list grammar, filled with case
+   studies instead of saved articles. */
+.rl__list {
+  max-width: 720px;
   padding: 0;
-  margin: 0;
+  margin: 0 auto;
   overflow: hidden;
   list-style: none;
   background: var(--glass-tint);
@@ -1116,64 +1248,359 @@
   -webkit-backdrop-filter: var(--glass-blur);
 }
 
-.bm__list li + li {
+.rl__list li + li {
   border-top: 1px solid var(--line);
 }
 
-.bm__list button {
-  display: flex;
-  gap: 0.7rem;
-  align-items: center;
+.rl__row {
+  display: grid;
+  gap: 0.2rem;
   width: 100%;
-  padding: 0.6rem 0.8rem;
-  font: inherit;
+  padding: 0.75rem 0.85rem;
   text-align: left;
   cursor: pointer;
   background: none;
   border: 0;
 }
 
-.bm__fav {
-  flex: none;
-  width: 34px;
-  height: 34px;
-  object-fit: cover;
-  border-radius: 8px;
+.rl__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 
-.bm__meta {
-  display: grid;
-  flex: 1;
-  min-width: 0;
-  gap: 0.1rem;
-}
-
-.bm__meta b {
+.rl__title {
   overflow: hidden;
-  font-size: 0.82rem;
-  font-weight: 500;
+  font-size: 0.84rem;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--bone);
 }
 
-.bm__meta em {
-  overflow: hidden;
-  font-size: 0.66rem;
+.rl__sub {
+  flex: none;
+  font-size: 0.6rem;
   font-style: normal;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: rgba(236, 229, 216, 0.45);
+  color: var(--amber);
 }
 
-.bm__n {
-  flex: none;
-  font-size: 0.62rem;
-  font-variant-numeric: tabular-nums;
+.rl__dek {
+  overflow: hidden;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: rgba(236, 229, 216, 0.5);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.rl__read {
+  font-size: 0.6rem;
   color: rgba(236, 229, 216, 0.32);
 }
 
+/* Testimonial quotes — Voice Memos retired, the words stand out on their
+   own here instead of being tucked into a separate app. */
+.qt__strip {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
+  scrollbar-width: none;
+}
+
+.qt__strip::-webkit-scrollbar {
+  display: none;
+}
+
+.qt__card {
+  /* Fixed width, not a percentage of the container — a percentage-sized
+     card looks fine on a narrow phone but balloons to an oversized card on
+     a wide desktop window (the "too big" complaint). A fixed width means
+     more cards simply show side by side as the window gets wider, which is
+     the responsive behaviour actually wanted. */
+  flex: 0 0 300px;
+  padding: 0.95rem 1rem 1rem;
+  background: var(--glass-tint);
+  border-left: 3px solid var(--accent, var(--amber));
+  border-radius: 14px;
+  box-shadow: var(--glass-rim);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.qt__text {
+  margin: 0 0 0.7rem;
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--bone);
+}
+
+.qt__by {
+  display: grid;
+  gap: 0.05rem;
+}
+
+.qt__by b {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--bone);
+}
+
+.qt__by span {
+  font-size: 0.62rem;
+  color: rgba(236, 229, 216, 0.45);
+}
+
+/* Suggestions — big tiles instead of a flat bookmarks list, the way
+   Safari's own start page suggests links. */
+.sg__grid {
+  display: grid;
+  /* One column on a phone-width screen, scaling up to 3-4 as the window
+     gets wider (a maximized desktop Safari window) — not a fixed single
+     column regardless of how much room is actually available. */
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.sg__card {
+  display: grid;
+  overflow: hidden;
+  text-align: left;
+  cursor: pointer;
+  background: var(--glass-tint);
+  border: 0;
+  border-radius: 16px;
+  box-shadow: var(--glass-rim);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.sg__img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.sg__meta {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.7rem 0.85rem 0.85rem;
+}
+
+.sg__title {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--bone);
+}
+
+.sg__excerpt {
+  overflow: hidden;
+  font-size: 0.72rem;
+  font-style: normal;
+  line-height: 1.35;
+  color: rgba(236, 229, 216, 0.5);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+[data-theme='light'] .rl__title,
+[data-theme='light'] .sg__title,
+[data-theme='light'] .ws__title,
+[data-theme='light'] .qt__text,
+[data-theme='light'] .qt__by b {
+  color: #17130f;
+}
+
+[data-theme='light'] .rl__dek,
+[data-theme='light'] .sg__excerpt,
+[data-theme='light'] .ws__host,
+[data-theme='light'] .sf__section-label,
+[data-theme='light'] .qt__by span {
+  color: rgba(23, 19, 15, 0.5);
+}
+
+/* Websites — live client sites, opened inline via iframe. Cards mirror the
+   Suggestions grid grammar (glass tile, title + meta) but swap the thumbnail
+   for a monogram glyph since a live site has no static preview image. */
+.ws__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.ws__card {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.75rem 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  background: var(--glass-tint);
+  border: 0;
+  border-radius: 16px;
+  box-shadow: var(--glass-rim);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.ws__glyph {
+  display: grid;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: rgba(236, 229, 216, 0.85);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 11px;
+  place-items: center;
+}
+
+.ws__meta {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+}
+
+.ws__title {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--bone);
+}
+
+.ws__host {
+  overflow: hidden;
+  font-size: 0.72rem;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(236, 229, 216, 0.5);
+}
+
+/* Inline site page — the frame gets a tall, fixed viewport of its own
+   (rather than trying to fill the OS window exactly) so its internal
+   scrolling stays the site's native, smooth scroll and never fights the
+   outer Safari view's scroll. */
+.ws__page {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.ws__page-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.75rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.ws__page-bar b {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--bone);
+}
+
+.ws__page-bar a {
+  font-size: 0.75rem;
+  color: rgba(236, 229, 216, 0.65);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.ws__frame-wrap {
+  overflow: hidden;
+  height: min(78vh, 900px);
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 16px;
+  box-shadow: var(--glass-rim);
+  -webkit-overflow-scrolling: touch;
+}
+
+.ws__frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* A project's embedded YouTube video sits inline in the write-up rather
+   than filling the whole browser pane the way a live site does — a plain
+   16:9 box instead of ws__frame-wrap's tall fixed height. */
+.pj__yt {
+  height: auto;
+  aspect-ratio: 16 / 9;
+  margin: 0.4rem 0;
+}
+
+.cal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: 100%;
+}
+
+.cal__frame-wrap {
+  flex: 1;
+  height: auto;
+  min-height: min(78vh, 760px);
+}
+
+.cal__fallback {
+  font-size: 0.72rem;
+  text-align: center;
+  color: rgba(236, 229, 216, 0.5);
+}
+
+.cal__fallback a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Manual icon override (see enhanceIconArt in os/apps.js) — a square image
+   at width:100%/height:auto matches every icon slot's sizing convention
+   (fixed square tiles and auto-height rail icons alike) without needing
+   per-container overrides. */
+.icon-art-custom {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: inherit;
+}
+
+/* Medium-style long read — larger, more generous type for the case-study
+   detail view opened from the Reading List. */
+.cs__read h3 {
+  font-size: 1.5rem;
+}
+
+.cs__read .nt__lede {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.cs__read p {
+  font-size: 0.92rem;
+  line-height: 1.75;
+}
+
 /* ------------------------------------------------------- project page --- */
+
+.pj {
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
 
 .pj__head h3 {
   margin: 0.2rem 0 0.15rem;
@@ -1206,6 +1633,143 @@
   margin-bottom: 1.1rem;
   border-radius: 18px;
   box-shadow: 0 14px 34px -18px rgba(0, 0, 0, 0.85);
+}
+
+/* ------------------------------------------------------------- slider --- */
+
+.pj__slider {
+  position: relative;
+  margin-bottom: 1.1rem;
+  border-radius: 18px;
+  box-shadow: 0 14px 34px -18px rgba(0, 0, 0, 0.85);
+}
+
+.pj__slider-track {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  border-radius: inherit;
+  scrollbar-width: none;
+}
+
+.pj__slider-track::-webkit-scrollbar {
+  display: none;
+}
+
+.pj__slide {
+  position: relative;
+  display: grid;
+  flex: 0 0 100%;
+  aspect-ratio: 9 / 16;
+  place-items: center;
+  scroll-snap-align: start;
+  background: #000;
+}
+
+/* contain, not cover — most of this creative is native 9:16 (Reels), some
+   of it isn't, and cropping to fill a fixed frame was cutting real content
+   (burned-in captions in particular tend to sit right at the top/bottom
+   edge, exactly what a cover-crop trims first). Letterboxing loses nothing;
+   cropping did. */
+.pj__slide img,
+.pj__slide video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.pj__slide-mute {
+  position: absolute;
+  right: 0.6rem;
+  bottom: 0.6rem;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: #fff;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.45);
+  border: 0;
+  border-radius: 50%;
+  backdrop-filter: blur(6px);
+}
+
+.pj__slide-mute svg {
+  width: 16px;
+  height: 16px;
+}
+
+.pj__slider-nav {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: #fff;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.4);
+  border: 0;
+  border-radius: 50%;
+  backdrop-filter: blur(6px);
+  transform: translateY(-50%);
+  transition: background 0.15s ease;
+}
+
+.pj__slider-nav:hover {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.pj__slider-nav svg {
+  width: 16px;
+  height: 16px;
+}
+
+.pj__slider-nav--prev {
+  left: 0.6rem;
+}
+
+.pj__slider-nav--next {
+  right: 0.6rem;
+}
+
+.pj__slider-dots {
+  position: absolute;
+  bottom: 0.7rem;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  gap: 0.3rem;
+  transform: translateX(-50%);
+}
+
+.pj__slider-dots span {
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 50%;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.pj__slider-dots span.is-active {
+  background: #fff;
+  transform: scale(1.3);
+}
+
+.pj__slider-count {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
 }
 
 .pj__src {
@@ -1335,334 +1899,162 @@
   color: rgba(23, 19, 15, 0.5);
 }
 
-/* --------------------------------------------------------------- music --- */
+/* --------------------------------------------------------------- radio --- */
 
-.mu__album {
+.rd {
   display: flex;
-  gap: 0.85rem;
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 1.3rem;
+  height: 100%;
+  padding-top: 0.6rem;
+  text-align: center;
 }
 
-.mu__cover {
-  display: grid;
-  flex: none;
-  gap: 3px;
-  place-content: center;
-  width: 62px;
-  height: 62px;
-  overflow: hidden;
-  border-radius: 12px;
-  background: linear-gradient(150deg, #fc5c74, #b8246a 60%, #5a2a7a);
-  box-shadow: var(--glass-rim);
-}
-
-.mu__cover i {
-  display: block;
-  width: 26px;
-  height: 3px;
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 3px;
-}
-
-.mu__cover i:nth-child(2) { width: 18px; }
-.mu__cover i:nth-child(3) { width: 22px; }
-
-.mu__title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-  font-weight: 500;
-  color: #fff;
-}
-
-.mu__sub {
-  margin: 0.15rem 0 0;
-  font-size: 0.7rem;
-  color: rgba(236, 229, 216, 0.5);
-}
-
-.mu__list {
-  padding: 0;
-  margin: 0 0 1rem;
-  overflow: hidden;
-  list-style: none;
-  background: var(--glass-tint);
-  border-radius: 16px;
-  box-shadow: var(--glass-rim);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-}
-
-.mu__list li + li {
-  border-top: 1px solid var(--line);
-}
-
-.mu__list button {
-  display: flex;
-  gap: 0.8rem;
-  align-items: center;
-  width: 100%;
-  padding: 0.7rem 0.9rem;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  background: none;
-  border: 0;
-}
-
-.mu__list button[aria-current] {
-  background: rgba(240, 67, 106, 0.16);
-}
-
-.mu__n {
-  flex: none;
-  width: 1rem;
-  font-size: 0.72rem;
-  color: rgba(236, 229, 216, 0.4);
-}
-
-.mu__list button[aria-current] .mu__n {
-  color: #ff6f8d;
-}
-
-.mu__meta {
-  display: grid;
-  flex: 1;
-  min-width: 0;
-}
-
-.mu__meta b {
-  overflow: hidden;
-  font-size: 0.84rem;
-  font-weight: 500;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--bone);
-}
-
-.mu__meta em {
-  font-size: 0.68rem;
-  font-style: normal;
-  color: rgba(236, 229, 216, 0.45);
-}
-
-.mu__len {
-  flex: none;
-  font-size: 0.7rem;
-  font-variant-numeric: tabular-nums;
-  color: rgba(236, 229, 216, 0.4);
-}
-
-.mu__bar {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-  padding: 0.7rem 0.85rem;
-  border-radius: 16px;
-  background: var(--glass-tint);
-  box-shadow: var(--glass-rim);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-}
-
-.mu__bar[hidden] {
-  display: none;
-}
-
-.mu__play {
+.rd__art {
   display: grid;
   flex: none;
   place-items: center;
-  width: 38px;
-  height: 38px;
-  color: #fff;
-  cursor: pointer;
-  background: #f0436a;
-  border: 0;
-  border-radius: 50%;
+  width: 128px;
+  height: 128px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: linear-gradient(150deg, #fc5c74, #b8246a 60%, #5a2a7a);
+  box-shadow: var(--glass-rim), 0 16px 34px -16px rgba(0, 0, 0, 0.7);
 }
 
-.mu__play svg {
+.rd__art img,
+.rd__art .icon-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.rd__station {
+  margin: 1.1rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.rd__tags {
+  margin: 0.3rem 0 0;
+  overflow: hidden;
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(236, 229, 216, 0.5);
+}
+
+.rd__transport {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  margin-top: 1.4rem;
+}
+
+.rd__btn {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  color: var(--bone);
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.08);
+  border: 0;
+  border-radius: 50%;
+  transition: background 0.15s ease;
+}
+
+.rd__btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.rd__btn svg {
   width: 17px;
   height: 17px;
 }
 
-.mu__now {
-  flex: 1;
-  min-width: 0;
-}
-
-.mu__now p {
-  margin: 0 0 0.4rem;
-  overflow: hidden;
-  font-size: 0.76rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--bone);
-}
-
-.mu__track {
-  height: 3px;
-  overflow: hidden;
-  background: rgba(236, 229, 216, 0.2);
-  border-radius: 3px;
-}
-
-.mu__track i {
-  display: block;
-  width: 0;
-  height: 100%;
+.rd__btn--play {
+  width: 56px;
+  height: 56px;
+  color: #fff;
   background: #f0436a;
-  border-radius: 3px;
-  transition: width 0.9s linear;
 }
 
-.mu__time {
-  flex: none;
-  font-size: 0.68rem;
-  font-variant-numeric: tabular-nums;
+.rd__btn--play:hover {
+  background: #f0436a;
+  opacity: 0.9;
+}
+
+.rd__btn--play svg {
+  width: 21px;
+  height: 21px;
+}
+
+.rd__volume {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 220px;
+  margin-top: 1.5rem;
   color: rgba(236, 229, 216, 0.5);
 }
 
-.mu__note {
-  margin: 1rem 0.2rem 0;
+.rd__volume svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+
+.rd__volume input[type='range'] {
+  flex: 1;
+  height: 4px;
+  appearance: none;
+  background: rgba(236, 229, 216, 0.2);
+  border-radius: 999px;
+  outline: none;
+}
+
+.rd__volume input[type='range']::-webkit-slider-thumb {
+  width: 15px;
+  height: 15px;
+  appearance: none;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+.rd__volume input[type='range']::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  background: #fff;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.rd__note {
+  max-width: 260px;
+  margin: 1.6rem auto 0;
   font-size: 0.68rem;
-  line-height: 1.45;
+  line-height: 1.5;
   color: rgba(236, 229, 216, 0.38);
 }
 
-.mu__note code {
-  font-size: 0.92em;
-  color: rgba(236, 229, 216, 0.6);
-}
-
-/* --------------------------------------------------------------- memos --- */
-
-.vm__note {
-  margin: 0 0.2rem 1rem;
-  font-size: 0.68rem;
-  line-height: 1.45;
-  color: rgba(236, 229, 216, 0.42);
-}
-
-.vm__list {
-  display: grid;
-  gap: 0.6rem;
-  padding: 0;
-  margin: 0;
-  list-style: none;
-}
-
-.vm__list li {
-  padding: 0.85rem 0.9rem 0.95rem;
-  border-radius: 16px;
-  background: var(--glass-tint);
-  box-shadow: var(--glass-rim);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-}
-
-.vm__row {
-  display: flex;
-  gap: 0.7rem;
-  align-items: center;
-  width: 100%;
-  padding: 0;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  background: none;
-  border: 0;
-}
-
-.vm__pp {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  color: #fff;
-  background: #f0436a;
-  border-radius: 50%;
-}
-
-.vm__pp svg {
-  width: 15px;
-  height: 15px;
-}
-
-[data-speaking] .vm__pp {
-  background: #8a8a90;
-}
-
-.vm__meta {
-  display: grid;
-  flex: 1;
-  min-width: 0;
-}
-
-.vm__meta b {
-  font-size: 0.84rem;
-  font-weight: 500;
-  color: var(--bone);
-}
-
-.vm__meta em {
-  font-size: 0.66rem;
-  font-style: normal;
-  color: rgba(236, 229, 216, 0.45);
-}
-
-.vm__badge {
-  flex: none;
-  padding: 0.15rem 0.45rem;
-  font-size: 0.52rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: rgba(236, 229, 216, 0.55);
-  border: 1px solid var(--line);
-  border-radius: 4px;
-}
-
-.vm__wave {
-  display: flex;
-  gap: 2px;
-  align-items: center;
-  height: 26px;
-  margin: 0.7rem 0 0.5rem;
-}
-
-.vm__wave i {
-  flex: 1;
-  height: var(--h);
-  background: rgba(236, 229, 216, 0.22);
-  border-radius: 2px;
-}
-
-[data-speaking] .vm__wave i {
-  background: #f0436a;
-  animation: vm-pulse 0.9s ease-in-out infinite alternate;
-}
-
-.vm__wave i:nth-child(3n) { animation-delay: 0.12s; }
-.vm__wave i:nth-child(3n + 1) { animation-delay: 0.26s; }
-
-@keyframes vm-pulse {
-  to {
-    transform: scaleY(0.45);
-  }
-}
-
-[data-theme='light'] .vm__meta b { color: #17130f; }
-[data-theme='light'] .vm__note,
-[data-theme='light'] .vm__meta em { color: rgba(23, 19, 15, 0.5); }
-
-@media (prefers-reduced-motion: reduce) {
-  [data-speaking] .vm__wave i { animation: none; }
-}
-
 /* ---------------------------------------------------------------- feed --- */
+
+/* Comfortable column width regardless of how wide the window actually is —
+   without this, a maximized desktop window stretches the 3-column grid's
+   tiles (aspect-ratio: 1, so they grow just as tall as they do wide) past
+   the window's own height, forcing a scroll to see a single row. No-op on
+   a phone-width screen, same reasoning as .pj and .nt__note. */
+.ig {
+  max-width: 720px;
+  margin: 0 auto;
+}
 
 .ig__bar {
   display: flex;
@@ -1757,6 +2149,7 @@
   width: 58px;
   height: 58px;
   padding: 2.5px;
+  overflow: hidden;
   border-radius: 50%;
   background: linear-gradient(135deg, #f9ce34, #ee2a7b, #6228d7);
 }
@@ -1786,6 +2179,30 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 2px;
   margin: 0 -1.3rem;
+}
+
+/* Self-hosted stand-ins for Instagram's oEmbed widget — plain tiles in the
+   app's own grid instead of an iframe with its own fixed chrome. */
+.ig__native-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  margin: 0.6rem -1.3rem 0;
+}
+
+.ig__native-tile {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1;
+  background: #000;
+}
+
+.ig__native-tile img,
+.ig__native-tile video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .ig__tile {
@@ -1957,9 +2374,67 @@
 }
 
 .ig__comments-link {
+  display: block;
   margin: 0 0 0.3rem;
+  padding: 0;
+  font: inherit;
   font-size: 0.78rem;
   color: rgba(236, 229, 216, 0.42);
+  text-align: left;
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+/* --------------------------------------------------------- home feed -- */
+
+.ig__home {
+  display: flex;
+  flex-direction: column;
+  gap: 1.7rem;
+  margin-top: 1rem;
+}
+
+.ig__post-media--natural {
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.ig__post-media--natural img,
+.ig__post-media--natural video {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  /* Real creative comes in whatever aspect ratio it was shot in — some of
+     it is far taller than 4:5. Capping height and letting width shrink to
+     match (rather than forcing width:100% and letting height run away)
+     keeps a single post inside the viewport instead of one image forcing
+     a scroll before you've seen the whole thing. */
+  max-height: min(62vh, 560px);
+  margin: 0 auto;
+  box-shadow: 0 14px 34px -18px rgba(0, 0, 0, 0.85);
+}
+
+.ig__hpost-mute {
+  position: absolute;
+  right: 0.6rem;
+  bottom: 0.6rem;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: #fff;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.45);
+  border: 0;
+  border-radius: 50%;
+  backdrop-filter: blur(6px);
+}
+
+.ig__hpost-mute svg {
+  width: 16px;
+  height: 16px;
 }
 
 .ig__timestamp {
@@ -2026,6 +2501,20 @@
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: rgba(236, 229, 216, 0.42);
+}
+
+/* Instagram's own widget renders its own white-chrome card — this just
+   gives it breathing room and keeps it from overflowing a narrow panel. */
+.ig__embeds {
+  display: grid;
+  gap: 1rem;
+  margin: 0 -1.3rem;
+  padding: 0 1.3rem;
+  overflow-x: auto;
+}
+
+.ig__embeds iframe {
+  max-width: 100% !important;
 }
 
 [data-theme='light'] .ig__brand,

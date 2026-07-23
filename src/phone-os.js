@@ -3,7 +3,23 @@ import { Flip } from 'gsap/Flip';
 import './styles/phone-os.css';
 import { services } from './data/services.js';
 import { projects } from './data/projects.js';
-import { APPS, SYSTEM_ORDER, DOCK_ORDER, PHONE, svg, fetchWeather } from './os/apps.js';
+import {
+  APPS,
+  SYSTEM_ORDER,
+  DOCK_ORDER,
+  PHONE,
+  svg,
+  fetchWeather,
+  nowPlayingStation,
+  loadStationArt,
+  ART_RADIO,
+  PLAY_ICON,
+  PAUSE_ICON,
+  ICON_SKIP_NEXT,
+  enhanceIconArt,
+} from './os/apps.js';
+import { radioAudio, radioToggle, radioNext, armFirstGestureAutoplay, armVideoDucking } from './os/radio.js';
+import { armIdleSleep } from './os/idle.js';
 
 /**
  * Beard Bros OS — prototype shell.
@@ -91,15 +107,15 @@ let unmount = null;
 
 /* `art` is full-bleed icon SVG; it paints its own field, so the tile drops the
    hue gradient and keeps only the glass rim. */
-const iconMarkup = (label, inner, hue, attrs, isArt) => `
+const iconMarkup = (label, inner, hue, attrs, isArt, iconId) => `
   <button class="app-icon" type="button" role="listitem" ${attrs} style="${tint(hue)}">
-    <span class="app-icon__tile${isArt ? ' app-icon__tile--art' : ''}" data-tile>${inner}</span>
+    <span class="app-icon__tile${isArt ? ' app-icon__tile--art' : ''}" data-tile${iconId ? ` data-icon-id="${iconId}"` : ''}>${inner}</span>
     <span class="app-icon__label">${label}</span>
   </button>`;
 
 const appIcon = (id) => {
   const a = APPS[id];
-  return iconMarkup(a.label, a.art, a.hue, `data-kind="system" data-id="${id}"`, true);
+  return iconMarkup(a.label, a.art, a.hue, `data-kind="system" data-id="${id}"`, true, id);
 };
 
 const chunk = (arr, size) =>
@@ -111,36 +127,134 @@ const chunk = (arr, size) =>
  * springboard pages overflowing icons rather than clipping or scrolling them.
  */
 const ICONS_PER_PAGE = 8;
-const [firstPageIcons, ...overflowPages] = chunk(SYSTEM_ORDER, ICONS_PER_PAGE);
 
-gridSystem.innerHTML = firstPageIcons.map(appIcon).join('');
+/* Icon order is user-rearrangeable (long-press → jiggle → drag, same idea
+   as real iOS), so it's mutable state loaded from storage rather than a
+   fixed constant — falling back to SYSTEM_ORDER, and reconciling against it
+   on load so a future app added to/removed from SYSTEM_ORDER doesn't break
+   a previously-saved arrangement. */
+function loadIconOrder() {
+  let stored = null;
+  try {
+    stored = JSON.parse(localStorage.getItem('phone-icon-order') ?? 'null');
+  } catch {
+    stored = null;
+  }
+  if (!Array.isArray(stored)) return [...SYSTEM_ORDER];
+  const valid = stored.filter((id) => SYSTEM_ORDER.includes(id));
+  const missing = SYSTEM_ORDER.filter((id) => !valid.includes(id));
+  return [...valid, ...missing];
+}
 
-let insertAfter = pages.querySelector('[aria-label="Home"]');
-overflowPages.forEach((ids, i) => {
-  insertAfter.insertAdjacentHTML(
-    'afterend',
-    `<section class="page" aria-label="More ${i + 1}">
-       <p class="springboard__label">More</p>
-       <div class="grid" role="list">${ids.map(appIcon).join('')}</div>
-     </section>`,
-  );
-  insertAfter = insertAfter.nextElementSibling;
-});
+function saveIconOrder() {
+  try {
+    localStorage.setItem('phone-icon-order', JSON.stringify(iconOrder));
+  } catch {
+    /* private mode — the arrangement just won't persist */
+  }
+}
 
-const PAGE_COUNT = 2 + overflowPages.length;
-pages.style.setProperty('--page-count', PAGE_COUNT);
+let iconOrder = loadIconOrder();
+let iconEditMode = false;
+let widgetEditMode = false;
+let PAGE_COUNT = 0;
+let pageStep = 0;
+
+/* Rebuilds every icon page (and the page dots) from `iconOrder` — called at
+   boot, and again after any drag-reorder or cross-page move so the paging
+   math (PAGE_COUNT, pageStep, the dots) always matches what's actually on
+   screen. */
+function rebuildIconPages() {
+  [...pages.querySelectorAll('.page[aria-label^="More"]')].forEach((el) => el.remove());
+
+  const [firstPageIcons, ...overflowIcons] = chunk(iconOrder, ICONS_PER_PAGE);
+  gridSystem.innerHTML = firstPageIcons.map(appIcon).join('');
+
+  let insertAfter = pages.querySelector('[aria-label="Home"]');
+  overflowIcons.forEach((ids, i) => {
+    insertAfter.insertAdjacentHTML(
+      'afterend',
+      `<section class="page" aria-label="More ${i + 1}">
+         <p class="springboard__label">More</p>
+         <div class="grid" role="list">${ids.map(appIcon).join('')}</div>
+       </section>`,
+    );
+    insertAfter = insertAfter.nextElementSibling;
+  });
+  enhanceIconArt(pages);
+
+  PAGE_COUNT = 2 + overflowIcons.length;
+  pageStep = 100 / PAGE_COUNT;
+  pages.style.setProperty('--page-count', PAGE_COUNT);
+  pages.classList.toggle('is-icon-editing', iconEditMode);
+
+  const labels = ['Home', ...overflowIcons.map((_, i) => `More ${i + 1}`), 'Today'];
+  dots.innerHTML = labels
+    .map(
+      (name, i) =>
+        `<button type="button" role="tab" data-page="${i}" aria-label="${name}" aria-selected="${i === page}"></button>`,
+    )
+    .join('');
+}
+
+rebuildIconPages();
 
 today.innerHTML = `
-  <div class="tw" data-tw-weather>
+  <div class="tw" data-tw-weather data-tw-id="weather">
     <p class="tw__label">Mumbai</p>
     <p class="tw__big" data-tw-temp>—</p>
     <p class="tw__sub" data-tw-desc>Fetching live conditions…</p>
   </div>
-  <div class="tw" data-tw-clock>
+  <div class="tw" data-tw-clock data-tw-id="clock">
     <p class="tw__label">Studio time</p>
     <p class="tw__big" data-tw-time>--:--</p>
     <p class="tw__sub">India Standard Time</p>
+  </div>
+  <div class="tw tw--radio" data-tw-radio data-tw-id="radio">
+    <span class="tw__radio-art" data-tw-radio-art>${ART_RADIO}</span>
+    <div class="tw__radio-meta">
+      <p class="tw__radio-station" data-tw-radio-station>Tuning in…</p>
+      <p class="tw__radio-tags" data-tw-radio-tags>Finding a station</p>
+    </div>
+    <div class="tw__radio-controls">
+      <button type="button" class="tw__radio-btn tw__radio-btn--play" data-tw-radio-play aria-label="Play">${PLAY_ICON}</button>
+      <button type="button" class="tw__radio-btn" data-tw-radio-next aria-label="Next station">${ICON_SKIP_NEXT}</button>
+    </div>
   </div>`;
+
+/* A saved custom widget order is applied by *moving* the already-created
+   nodes above (appendChild on an existing child relocates it — it doesn't
+   clone or recreate it), never by regenerating the HTML — the weather/
+   clock/radio wiring immediately below attaches listeners straight to
+   these specific elements, and a wholesale re-render would silently
+   orphan every one of them. */
+function loadWidgetOrder() {
+  const defaultOrder = ['weather', 'clock', 'radio'];
+  let stored = null;
+  try {
+    stored = JSON.parse(localStorage.getItem('phone-widget-order') ?? 'null');
+  } catch {
+    stored = null;
+  }
+  if (!Array.isArray(stored)) return defaultOrder;
+  const valid = stored.filter((id) => defaultOrder.includes(id));
+  const missing = defaultOrder.filter((id) => !valid.includes(id));
+  return [...valid, ...missing];
+}
+
+function saveWidgetOrder() {
+  const order = [...today.children].map((el) => el.dataset.twId);
+  try {
+    localStorage.setItem('phone-widget-order', JSON.stringify(order));
+  } catch {
+    /* private mode — the arrangement just won't persist */
+  }
+}
+
+loadWidgetOrder().forEach((id) => {
+  const el = today.querySelector(`[data-tw-id="${id}"]`);
+  if (el) today.appendChild(el);
+});
 
 /* The Today widgets run whether or not their apps are open. */
 {
@@ -165,26 +279,59 @@ today.innerHTML = `
     });
 }
 
+/* Same shared-state pattern as the desktop widget: reads the one Audio
+   element every shell touches, so switching stations from the lock
+   screen, Control Center or the Radio app itself all stay in sync here. */
+{
+  const artEl = $('[data-tw-radio-art]');
+  const stationEl = $('[data-tw-radio-station]');
+  const tagsEl = $('[data-tw-radio-tags]');
+  const playBtn = $('[data-tw-radio-play]');
+
+  const paint = () => {
+    const info = nowPlayingStation();
+    if (!info) {
+      stationEl.textContent = 'Tuning in…';
+      tagsEl.textContent = 'Finding a station';
+      return;
+    }
+    stationEl.textContent = info.name;
+    tagsEl.textContent = info.tags || 'Rock';
+    playBtn.innerHTML = info.paused ? PLAY_ICON : PAUSE_ICON;
+    playBtn.setAttribute('aria-label', info.paused ? 'Play' : 'Pause');
+    loadStationArt(info.favicon).then((img) => {
+      if (img) {
+        artEl.innerHTML = '';
+        artEl.appendChild(img);
+      } else {
+        artEl.innerHTML = ART_RADIO;
+      }
+    });
+  };
+
+  paint();
+  radioAudio.addEventListener('play', paint);
+  radioAudio.addEventListener('pause', paint);
+  radioAudio.addEventListener('loadedmetadata', paint);
+
+  $('[data-tw-radio-play]').addEventListener('click', () => radioToggle());
+  $('[data-tw-radio-next]').addEventListener('click', () => radioNext());
+}
+
+armFirstGestureAutoplay();
+armVideoDucking();
+
 dock.innerHTML = [PHONE.id, ...DOCK_ORDER]
   .map((id) => {
     const a = id === PHONE.id ? PHONE : APPS[id];
     return `
       <button class="dock__item" type="button" role="listitem" data-kind="${id === PHONE.id ? 'tel' : 'system'}" data-id="${id}"
               style="${tint(a.hue)}" aria-label="${a.label}">
-        <span class="dock__tile dock__tile--art" data-tile>${a.art}</span>
+        <span class="dock__tile dock__tile--art" data-tile data-icon-id="${id}">${a.art}</span>
       </button>`;
   })
   .join('');
-
-const PAGE_LABELS = ['Home', ...overflowPages.map((_, i) => `More ${i + 1}`), 'Today'];
-
-dots.innerHTML = PAGE_LABELS
-  .map(
-    (name, i) =>
-      `<button type="button" role="tab" data-page="${i}" aria-label="${name}"
-               aria-selected="${i === 0}"></button>`,
-  )
-  .join('');
+enhanceIconArt(dock);
 
 $('[data-semantic-services]').innerHTML = services
   .map((s) => `<li><a href="/services/#${s.slug}">${s.name}</a>: ${s.blurb}</li>`)
@@ -203,8 +350,6 @@ tick();
 setInterval(tick, 15_000);
 
 /* -------------------------------------------------------------- paging -- */
-
-const pageStep = 100 / PAGE_COUNT;
 
 function goTo(next, animate = true) {
   page = Math.max(0, Math.min(PAGE_COUNT - 1, next));
@@ -230,7 +375,7 @@ dots.addEventListener('click', (e) => {
   const springboard = $('[data-springboard]');
 
   springboard.addEventListener('pointerdown', (e) => {
-    if (!app.hidden) return;
+    if (!app.hidden || iconEditMode || widgetEditMode) return;
     startX = e.clientX;
     startY = e.clientY;
     dragging = true;
@@ -269,6 +414,310 @@ dots.addEventListener('click', (e) => {
 
   springboard.addEventListener('pointerup', release);
   springboard.addEventListener('pointercancel', release);
+}
+
+/*
+ * Long-press any home-screen icon → the page jiggles (iOS-style) and every
+ * icon becomes immediately draggable, including across pages: holding a
+ * drag near the left/right edge for a moment flips to the adjacent page,
+ * same as a real springboard. Tapping the "Done" pill, or empty background
+ * while editing, exits back to normal tap-to-open behaviour.
+ */
+{
+  const LONG_PRESS_MS = 500;
+  const MOVE_CANCEL_PX = 8;
+  const EDGE_ZONE = 46;
+  const EDGE_DWELL_MS = 700;
+  const doneBtn = $('[data-springboard-done]');
+  const springboard = $('[data-springboard]');
+
+  let pressTimer = null;
+  let pressStartX = 0;
+  let pressStartY = 0;
+
+  let draggedId = null;
+  let dragGhost = null;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+  let edgeTimer = null;
+  let rafPending = false;
+  let lastClientX = 0;
+  let lastClientY = 0;
+  let lastTargetIndex = -1;
+
+  function setIconEditMode(on) {
+    iconEditMode = on;
+    pages.classList.toggle('is-icon-editing', on);
+    doneBtn.hidden = !on;
+  }
+
+  /* The page currently centred — Today has no icons, so this only ever
+     matters (and is only ever called) while on one of the icon pages. */
+  function currentIconGrid() {
+    const iconPages = [...pages.querySelectorAll('.page')].filter((p) => p.getAttribute('aria-label') !== 'Today');
+    return iconPages[page]?.querySelector('.grid') ?? null;
+  }
+
+  function closestIconOrderIndex(clientX, clientY) {
+    const gridEl = currentIconGrid();
+    if (!gridEl) return -1;
+    const icons = [...gridEl.querySelectorAll('.app-icon')];
+    let bestSlot = -1;
+    let bestDist = Infinity;
+    icons.forEach((el, i) => {
+      const r = el.getBoundingClientRect();
+      const d = Math.hypot(r.left + r.width / 2 - clientX, r.top + r.height / 2 - clientY);
+      if (d < bestDist) {
+        bestDist = d;
+        bestSlot = i;
+      }
+    });
+    return bestSlot === -1 ? -1 : page * ICONS_PER_PAGE + bestSlot;
+  }
+
+  function startIconDrag(icon, e) {
+    draggedId = icon.dataset.id;
+    lastTargetIndex = iconOrder.indexOf(draggedId);
+    icon.classList.add('is-dragging-icon');
+
+    const rect = icon.getBoundingClientRect();
+    dragOffsetX = e.clientX - rect.left;
+    dragOffsetY = e.clientY - rect.top;
+
+    dragGhost = icon.cloneNode(true);
+    dragGhost.classList.remove('is-dragging-icon');
+    dragGhost.classList.add('app-icon--ghost');
+    dragGhost.style.width = `${rect.width}px`;
+    dragGhost.style.left = `${rect.left}px`;
+    dragGhost.style.top = `${rect.top}px`;
+    document.body.appendChild(dragGhost);
+  }
+
+  function moveIconGhost(clientX, clientY) {
+    if (!dragGhost) return;
+    dragGhost.style.left = `${clientX - dragOffsetX}px`;
+    dragGhost.style.top = `${clientY - dragOffsetY}px`;
+  }
+
+  function checkEdgeFlip(clientX) {
+    const rect = springboard.getBoundingClientRect();
+    const nearLeft = clientX - rect.left < EDGE_ZONE;
+    const nearRight = rect.right - clientX < EDGE_ZONE;
+    const canGoLeft = nearLeft && page > 0;
+    const canGoRight = nearRight && page < PAGE_COUNT - 2; // Today (last page) has no icons to drag into
+
+    if (canGoLeft || canGoRight) {
+      if (!edgeTimer) {
+        edgeTimer = setTimeout(() => {
+          edgeTimer = null;
+          goTo(page + (canGoLeft ? -1 : 1));
+        }, EDGE_DWELL_MS);
+      }
+    } else if (edgeTimer) {
+      clearTimeout(edgeTimer);
+      edgeTimer = null;
+    }
+  }
+
+  function endIconDrag() {
+    clearTimeout(pressTimer);
+    pressTimer = null;
+    if (edgeTimer) {
+      clearTimeout(edgeTimer);
+      edgeTimer = null;
+    }
+    if (dragGhost) {
+      dragGhost.remove();
+      dragGhost = null;
+    }
+    if (draggedId) {
+      pages.querySelector(`[data-id="${draggedId}"]`)?.classList.remove('is-dragging-icon');
+      saveIconOrder();
+    }
+    draggedId = null;
+    lastTargetIndex = -1;
+  }
+
+  pages.addEventListener('pointerdown', (e) => {
+    const icon = e.target.closest('.app-icon');
+
+    if (!icon) {
+      if (iconEditMode) setIconEditMode(false);
+      return;
+    }
+
+    pressStartX = e.clientX;
+    pressStartY = e.clientY;
+
+    if (iconEditMode) {
+      startIconDrag(icon, e);
+      return;
+    }
+
+    pressTimer = setTimeout(() => {
+      pressTimer = null;
+      setIconEditMode(true);
+      startIconDrag(icon, e);
+    }, LONG_PRESS_MS);
+  });
+
+  pages.addEventListener('pointermove', (e) => {
+    if (pressTimer && (Math.abs(e.clientX - pressStartX) > MOVE_CANCEL_PX || Math.abs(e.clientY - pressStartY) > MOVE_CANCEL_PX)) {
+      clearTimeout(pressTimer);
+      pressTimer = null;
+    }
+
+    if (!draggedId) return;
+    e.preventDefault();
+    lastClientX = e.clientX;
+    lastClientY = e.clientY;
+    moveIconGhost(e.clientX, e.clientY);
+    checkEdgeFlip(e.clientX);
+
+    if (rafPending) return;
+    rafPending = true;
+    requestAnimationFrame(() => {
+      rafPending = false;
+      if (!draggedId) return;
+      const targetIndex = closestIconOrderIndex(lastClientX, lastClientY);
+      if (targetIndex === -1 || targetIndex === lastTargetIndex) return;
+      lastTargetIndex = targetIndex;
+      const from = iconOrder.indexOf(draggedId);
+      if (from === -1 || from === targetIndex) return;
+      iconOrder.splice(from, 1);
+      iconOrder.splice(targetIndex, 0, draggedId);
+      rebuildIconPages();
+      pages.querySelector(`[data-id="${draggedId}"]`)?.classList.add('is-dragging-icon');
+    });
+  });
+
+  pages.addEventListener('pointerup', endIconDrag);
+  pages.addEventListener('pointercancel', endIconDrag);
+
+  doneBtn.addEventListener('click', () => setIconEditMode(false));
+}
+
+/*
+ * Same long-press → jiggle → drag idea, scoped to the Today page's three
+ * widget cards — a vertical reorder rather than a cross-page one, since
+ * Today is a single page. Reordering moves the real DOM nodes (see
+ * loadWidgetOrder above) rather than regenerating them, so the weather/
+ * clock/radio wiring already attached to these elements survives.
+ */
+{
+  const LONG_PRESS_MS = 500;
+  const MOVE_CANCEL_PX = 8;
+
+  let pressTimer = null;
+  let pressStartX = 0;
+  let pressStartY = 0;
+  let draggedEl = null;
+  let dragGhost = null;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+
+  function setWidgetEditMode(on) {
+    widgetEditMode = on;
+    today.classList.toggle('is-widget-editing', on);
+  }
+
+  function startWidgetDrag(card, e) {
+    draggedEl = card;
+    card.classList.add('is-dragging-widget');
+
+    const rect = card.getBoundingClientRect();
+    dragOffsetX = e.clientX - rect.left;
+    dragOffsetY = e.clientY - rect.top;
+
+    dragGhost = card.cloneNode(true);
+    dragGhost.classList.remove('is-dragging-widget');
+    dragGhost.classList.add('tw--ghost');
+    dragGhost.style.width = `${rect.width}px`;
+    dragGhost.style.left = `${rect.left}px`;
+    dragGhost.style.top = `${rect.top}px`;
+    document.body.appendChild(dragGhost);
+  }
+
+  function moveWidgetGhost(clientX, clientY) {
+    if (!dragGhost) return;
+    dragGhost.style.left = `${clientX - dragOffsetX}px`;
+    dragGhost.style.top = `${clientY - dragOffsetY}px`;
+  }
+
+  /* Nearest-neighbour vertical reorder: find the first sibling whose
+     midpoint the pointer is still above, and slot the dragged card in
+     right before it — falling through to the end if the pointer is below
+     everything. */
+  function reorderByPointer(clientY) {
+    if (!draggedEl) return;
+    const siblings = [...today.children].filter((el) => el !== draggedEl);
+    for (const sib of siblings) {
+      const r = sib.getBoundingClientRect();
+      if (clientY < r.top + r.height / 2) {
+        if (sib.previousElementSibling !== draggedEl) today.insertBefore(draggedEl, sib);
+        return;
+      }
+    }
+    if (today.lastElementChild !== draggedEl) today.appendChild(draggedEl);
+  }
+
+  function endWidgetDrag() {
+    clearTimeout(pressTimer);
+    pressTimer = null;
+    if (dragGhost) {
+      dragGhost.remove();
+      dragGhost = null;
+    }
+    if (draggedEl) {
+      draggedEl.classList.remove('is-dragging-widget');
+      saveWidgetOrder();
+    }
+    draggedEl = null;
+  }
+
+  /* Listens on the whole Today *page*, not just the `.today` grid itself —
+     the grid is only as tall as its three cards, so a tap in the empty
+     space below them (a very natural place to tap to dismiss) would
+     otherwise land outside anything listening for it. The full page also
+     gives drag tracking more room to work with, the same reasoning the
+     icon reorder above uses `pages` (not just the grid) for. */
+  const todayPage = today.closest('.page');
+
+  todayPage.addEventListener('pointerdown', (e) => {
+    const card = e.target.closest('.tw');
+    if (!card || e.target.closest('button')) {
+      if (!card && widgetEditMode) setWidgetEditMode(false);
+      return;
+    }
+
+    pressStartX = e.clientX;
+    pressStartY = e.clientY;
+
+    if (widgetEditMode) {
+      startWidgetDrag(card, e);
+      return;
+    }
+
+    pressTimer = setTimeout(() => {
+      pressTimer = null;
+      setWidgetEditMode(true);
+      startWidgetDrag(card, e);
+    }, LONG_PRESS_MS);
+  });
+
+  todayPage.addEventListener('pointermove', (e) => {
+    if (pressTimer && (Math.abs(e.clientX - pressStartX) > MOVE_CANCEL_PX || Math.abs(e.clientY - pressStartY) > MOVE_CANCEL_PX)) {
+      clearTimeout(pressTimer);
+      pressTimer = null;
+    }
+    if (!draggedEl) return;
+    e.preventDefault();
+    moveWidgetGhost(e.clientX, e.clientY);
+    reorderByPointer(e.clientY);
+  });
+
+  todayPage.addEventListener('pointerup', endWidgetDrag);
+  todayPage.addEventListener('pointercancel', endWidgetDrag);
 }
 
 /* ------------------------------------------------------ press feedback -- */
@@ -408,6 +857,7 @@ const launch = (btn) => {
 };
 
 pages.addEventListener('click', (e) => {
+  if (iconEditMode) return;
   const btn = e.target.closest('.app-icon');
   if (btn) launch(btn);
 });
@@ -604,3 +1054,12 @@ cc.addEventListener('click', (e) => {
     mode = null;
   });
 }
+
+/* --------------------------------------------------------------- sleep -- */
+
+armIdleSleep({
+  overlayEl: $('[data-phone-sleep]'),
+  timeEl: $('[data-phone-sleep-time]'),
+  dateEl: $('[data-phone-sleep-date]'),
+  timeoutMs: 60_000,
+});

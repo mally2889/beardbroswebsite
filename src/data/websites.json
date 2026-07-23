@@ -1,0 +1,10 @@
+{
+  "websites": [
+    { "name": "Sumex", "url": "https://sumex.co.in/" },
+    { "name": "The Origin", "url": "https://test.beardbros.in/" },
+    { "name": "Urban Spaces", "url": "https://web.beardbros.in/" },
+    { "name": "Ventique", "url": "https://ventique.beardbros.in/" },
+    { "name": "Breakaway Creatives", "url": "https://breakawaycreatives.com/" },
+    { "name": "Isvaari", "url": "https://isvaari.com/" }
+  ]
+}

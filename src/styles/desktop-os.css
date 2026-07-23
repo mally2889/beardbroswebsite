@@ -85,6 +85,201 @@ html.os-desktop body {
     radial-gradient(44rem 34rem at 92% 46%, rgba(232, 176, 75, 0.3), transparent 58%),
     radial-gradient(50rem 40rem at 42% 108%, rgba(96, 62, 176, 0.38), transparent 62%),
     linear-gradient(168deg, #26190f 0%, #14100c 48%, #0b0a08 100%);
+  transition: background 0.5s ease;
+}
+
+.dt-wallpaper[data-preset='1'] {
+  background:
+    radial-gradient(46rem 34rem at 82% -6%, rgba(70, 140, 255, 0.5), transparent 58%),
+    radial-gradient(40rem 40rem at 6% 18%, rgba(60, 200, 190, 0.4), transparent 60%),
+    radial-gradient(44rem 34rem at 92% 46%, rgba(130, 100, 255, 0.3), transparent 58%),
+    radial-gradient(50rem 40rem at 42% 108%, rgba(40, 90, 200, 0.35), transparent 62%),
+    linear-gradient(168deg, #0f1a26 0%, #0c1319 48%, #080d11 100%);
+}
+
+.dt-wallpaper[data-preset='2'] {
+  background:
+    radial-gradient(46rem 34rem at 82% -6%, rgba(120, 200, 90, 0.5), transparent 58%),
+    radial-gradient(40rem 40rem at 6% 18%, rgba(220, 160, 60, 0.4), transparent 60%),
+    radial-gradient(44rem 34rem at 92% 46%, rgba(190, 90, 60, 0.3), transparent 58%),
+    radial-gradient(50rem 40rem at 42% 108%, rgba(90, 130, 50, 0.35), transparent 62%),
+    linear-gradient(168deg, #1c2410 0%, #141a0c 48%, #0b0d07 100%);
+}
+
+.dt-wallpaper[data-preset='3'] {
+  background:
+    radial-gradient(46rem 34rem at 82% -6%, rgba(200, 200, 205, 0.16), transparent 58%),
+    radial-gradient(50rem 40rem at 42% 108%, rgba(150, 110, 70, 0.24), transparent 62%),
+    linear-gradient(168deg, #1c1a17 0%, #131211 48%, #0a0a09 100%);
+}
+
+/* -------------------------------------------------------------------- boot -- */
+
+.dt-boot {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.3rem;
+  background: var(--ink);
+  pointer-events: none;
+}
+
+.dt-boot__mark svg {
+  width: 52px;
+  height: 52px;
+  fill: none;
+  stroke: var(--bone);
+  stroke-width: 1.6;
+  opacity: 0.9;
+}
+
+.dt-boot__mark circle:first-child {
+  fill: var(--copper);
+  stroke: none;
+}
+
+.dt-boot__word {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--bone);
+}
+
+.dt-boot__bar {
+  width: 160px;
+  height: 3px;
+  overflow: hidden;
+  background: rgba(236, 229, 216, 0.14);
+  border-radius: 999px;
+}
+
+.dt-boot__bar span {
+  display: block;
+  width: 0%;
+  height: 100%;
+  background: var(--copper);
+  border-radius: inherit;
+}
+
+/* -------------------------------------------------------------------- sleep -- */
+
+.dt-sleep {
+  position: absolute;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(6, 5, 4, 0.7);
+  backdrop-filter: blur(40px) saturate(140%);
+  -webkit-backdrop-filter: blur(40px) saturate(140%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+.dt-sleep.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dt-sleep__time {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 5rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--bone);
+  font-variant-numeric: tabular-nums;
+}
+
+.dt-sleep__date {
+  margin: 0;
+  font-size: 1rem;
+  color: rgba(236, 229, 216, 0.7);
+}
+
+.dt-sleep__hint {
+  margin: 2.4rem 0 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: rgba(236, 229, 216, 0.4);
+}
+
+/* ------------------------------------------------------------ log out -- */
+
+.dt-loggedout {
+  position: absolute;
+  inset: 0;
+  z-index: 92;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(6, 5, 4, 0.7);
+  backdrop-filter: blur(40px) saturate(140%);
+  -webkit-backdrop-filter: blur(40px) saturate(140%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.dt-loggedout.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dt-loggedout__mark {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 0 0.6rem;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--bone);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+}
+
+.dt-loggedout__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: var(--bone);
+}
+
+.dt-loggedout__hint {
+  margin: 0.2rem 0 1.6rem;
+  font-size: 0.8rem;
+  color: rgba(236, 229, 216, 0.5);
+}
+
+.dt-loggedout__btn {
+  padding: 0.6rem 1.3rem;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1a1305;
+  cursor: pointer;
+  background: var(--amber);
+  border: 0;
+  border-radius: 999px;
+}
+
+.dt-loggedout__btn:hover {
+  opacity: 0.9;
 }
 
 /* ---------------------------------------------------------------- menu bar -- */
@@ -107,16 +302,6 @@ html.os-desktop body {
   user-select: none;
 }
 
-.dt-menubar__brand {
-  font-family: var(--font-display);
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.dt-menubar__menu {
-  color: rgba(255, 255, 255, 0.72);
-}
-
 .dt-menubar__spacer {
   flex: 1;
 }
@@ -137,8 +322,1002 @@ html.os-desktop body {
   background: #6ee07a;
 }
 
+.dt-menubar__date,
 .dt-menubar__time {
   font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dt-menubar__date {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ------------------------------------------------------------- menus -- */
+
+.dt-menubar__menus {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.dt-menu {
+  position: relative;
+}
+
+.dt-menu__trigger {
+  padding: 0.3rem 0.55rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-radius: 6px;
+}
+
+.dt-menu__trigger--brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.94);
+  letter-spacing: -0.01em;
+}
+
+.dt-menu__brand-mark {
+  display: block;
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+}
+
+/* Easter egg confetti — see launchBeardConfetti() in desktop-os.js. */
+.dt-confetti {
+  position: absolute;
+  top: 0;
+  z-index: 45;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+}
+
+.dt-menu.is-open .dt-menu__trigger,
+.dt-menu__trigger:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.dt-menu__panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  display: none;
+  flex-direction: column;
+  min-width: 215px;
+  padding: 0.35rem;
+  background: rgba(28, 24, 19, 0.88);
+  border-radius: 11px;
+  box-shadow: var(--glass-rim), var(--glass-lift);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+/* Right-click menu — same item styling as the menu bar's dropdowns
+   (.dt-menu__item etc., shared via renderMenuPanel), just cursor-positioned
+   instead of anchored under a trigger. */
+.dt-ctx-menu {
+  position: absolute;
+  z-index: 40;
+  display: none;
+  flex-direction: column;
+  min-width: 220px;
+  padding: 0.35rem;
+  background: rgba(28, 24, 19, 0.9);
+  border-radius: 11px;
+  box-shadow: var(--glass-rim), var(--glass-lift);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.dt-ctx-menu.is-open {
+  display: flex;
+}
+
+.dt-menu.is-open .dt-menu__panel {
+  display: flex;
+}
+
+.dt-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.42rem 0.6rem;
+  font: inherit;
+  font-size: 0.8rem;
+  text-align: left;
+  color: rgba(236, 229, 216, 0.9);
+  cursor: pointer;
+  white-space: nowrap;
+  background: none;
+  border: 0;
+  border-radius: 6px;
+}
+
+.dt-menu__item:hover:not(:disabled) {
+  color: #fff;
+  background: var(--copper);
+}
+
+.dt-menu__item:disabled {
+  color: rgba(236, 229, 216, 0.32);
+  cursor: default;
+}
+
+.dt-menu__check {
+  flex: none;
+  width: 0.9em;
+  font-size: 0.72rem;
+  opacity: 0.85;
+}
+
+.dt-menu__label {
+  flex: 1;
+}
+
+.dt-menu__kbd {
+  flex: none;
+  font-size: 0.68rem;
+  color: rgba(236, 229, 216, 0.4);
+}
+
+.dt-menu__sep {
+  height: 1px;
+  margin: 0.3rem 0.2rem;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ------------------------------------------------------ status icons -- */
+
+.dt-menubar__icons {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin-right: 0.15rem;
+}
+
+.dt-icon {
+  display: flex;
+  align-items: center;
+  gap: 0.28rem;
+  padding: 0.28rem 0.4rem;
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-radius: 6px;
+}
+
+.dt-icon:hover,
+.dt-icon.is-open {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.dt-icon svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.dt-icon.is-off {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.dt-icon--battery svg {
+  width: 22px;
+  height: 12px;
+}
+
+.dt-icon__pct {
+  font-size: 0.66rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------- control center -- */
+
+.dt-cc {
+  position: absolute;
+  top: 34px;
+  right: 1rem;
+  z-index: 30;
+  display: none;
+}
+
+.dt-cc.is-open {
+  display: block;
+}
+
+.dt-cc__sheet {
+  width: 230px;
+  padding: 0.7rem;
+  /* Opaque, not the thin --glass-tint the Dock uses — this sits directly
+     over the widgets and needs to fully hide them, not just frost them. */
+  background: rgba(26, 22, 17, 0.9);
+  border-radius: 18px;
+  box-shadow: var(--glass-rim), var(--glass-lift);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  user-select: none;
+}
+
+.dt-cc__toggles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.dt-cc__toggle {
+  display: grid;
+  gap: 0.3rem;
+  place-items: center;
+  padding: 0.65rem 0.3rem;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.07);
+  border: 0;
+  border-radius: 13px;
+  transition: background 0.2s ease;
+}
+
+.dt-cc__toggle-icon {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  color: rgba(236, 229, 216, 0.7);
+}
+
+.dt-cc__toggle-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.dt-cc__toggle-label {
+  font-size: 0.58rem;
+  color: rgba(236, 229, 216, 0.6);
+}
+
+.dt-cc__toggle[aria-pressed='true'] {
+  background: var(--amber);
+}
+
+.dt-cc__toggle[aria-pressed='true'] .dt-cc__toggle-icon,
+.dt-cc__toggle[aria-pressed='true'] .dt-cc__toggle-label {
+  color: #1a1305;
+}
+
+.dt-cc__slider {
+  padding: 0.55rem 0.65rem;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 13px;
+}
+
+.dt-cc__slider-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+  font-size: 0.64rem;
+  color: rgba(236, 229, 216, 0.7);
+}
+
+.dt-cc__slider-val {
+  color: rgba(236, 229, 216, 0.45);
+  font-variant-numeric: tabular-nums;
+}
+
+.dt-cc__range {
+  width: 100%;
+  height: 4px;
+  appearance: none;
+  background: rgba(236, 229, 216, 0.2);
+  border-radius: 999px;
+  outline: none;
+}
+
+.dt-cc__range::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+  appearance: none;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+.dt-cc__range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.dt-cc__widgets-picker {
+  padding: 0.6rem 0.65rem;
+  margin-bottom: 0.6rem;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 13px;
+}
+
+.dt-cc__widgets-label {
+  margin: 0 0 0.45rem;
+  font-size: 0.6rem;
+  color: rgba(236, 229, 216, 0.6);
+}
+
+.dt-cc__widgets-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.dt-cc__widgets-chip {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.66rem;
+  color: var(--bone);
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.1);
+  border: 0;
+  border-radius: 999px;
+}
+
+.dt-cc__widgets-chip:hover {
+  background: var(--amber);
+  color: #1a1305;
+}
+
+.dt-cc__widgets-chip--add {
+  background: color-mix(in srgb, var(--amber) 22%, transparent);
+  color: var(--amber);
+}
+
+.dt-cc__widgets-chip--add:hover {
+  background: var(--amber);
+  color: #1a1305;
+}
+
+.dt-cc__radio {
+  padding: 0.65rem 0.7rem;
+  margin-bottom: 0.6rem;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 13px;
+}
+
+.dt-cc__radio-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.55rem;
+}
+
+.dt-cc__radio-art {
+  display: block;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.dt-cc__radio-art img,
+.dt-cc__radio-art .icon-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.dt-cc__radio-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.dt-cc__radio-station {
+  margin: 0;
+  overflow: hidden;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--bone);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dt-cc__radio-tags {
+  margin: 0.1rem 0 0;
+  overflow: hidden;
+  font-size: 0.6rem;
+  color: rgba(236, 229, 216, 0.5);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dt-cc__radio-controls {
+  display: flex;
+  flex: none;
+  gap: 0.25rem;
+}
+
+.dt-cc__radio-btn {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  color: var(--bone);
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.08);
+  border: 0;
+  border-radius: 50%;
+}
+
+.dt-cc__radio-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.dt-cc__radio-btn--play {
+  color: #1a1305;
+  background: var(--amber);
+}
+
+/* ------------------------------------------------------------- toast -- */
+
+.dt-toast {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  z-index: 40;
+  padding: 0.5rem 0.95rem;
+  font-size: 0.76rem;
+  color: var(--bone);
+  white-space: nowrap;
+  background: var(--glass-tint);
+  border-radius: 999px;
+  box-shadow: var(--glass-rim), var(--glass-lift);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  transform: translateX(-50%);
+}
+
+/* ----------------------------------------------------------- widgets -- */
+
+.dt-widgets {
+  position: absolute;
+  top: 44px;
+  left: 1.2rem;
+  right: 1.2rem;
+  z-index: 1;
+  display: grid;
+  grid-auto-rows: min-content;
+  grid-template-columns: repeat(auto-fill, 216px);
+  /* Caps the grid's own column math at four (216px × 4 + 3 gaps), so the
+     default/reset layout always stays a tidy block hugging the left side
+     — not "however many columns fit," which on a wide monitor spreads
+     auto-fill all the way toward the icon rail on the right. This only
+     bounds the grid's *own* box; it doesn't constrain how far a dragged
+     widget (repositioned via inline left/top, taken out of grid flow
+     entirely — see makeMovable/placeAbsolute) can still be placed, since
+     overflow stays visible below. */
+  max-width: 912px;
+  gap: 1rem;
+  overflow: visible;
+  /* The layer itself shouldn't catch stray clicks between cards — only
+     the cards (and, mid-drag, whichever one is absolute) should. */
+  pointer-events: none;
+}
+
+.dt-widgets.is-hidden {
+  display: none;
+}
+
+.dtw {
+  position: relative;
+  width: 216px;
+  padding: 1.1rem 1.2rem 1.3rem;
+  cursor: grab;
+  user-select: none;
+  background: rgba(20, 17, 14, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 22px;
+  box-shadow: 0 22px 44px -26px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  pointer-events: auto;
+}
+
+.dtw--wide {
+  grid-column: span 2;
+  width: 448px;
+}
+
+.dtw:hover {
+  transform: translateY(-2px);
+}
+
+.dtw.is-dragging {
+  cursor: grabbing;
+  z-index: 5;
+  /* The drag itself is driven by a raw `transform` on every pointer move —
+     without this, .dtw's own hover-lift transition would apply to that
+     same property and lag the widget behind the cursor by its 0.2s ease,
+     turning an otherwise 1:1 drag back into something that feels delayed. */
+  transition: none;
+  box-shadow: 0 34px 64px -20px rgba(0, 0, 0, 0.78);
+}
+
+.dtw__remove {
+  position: absolute;
+  top: -7px;
+  left: -7px;
+  z-index: 3;
+  display: none;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  color: #fff;
+  cursor: pointer;
+  background: #ff5f57;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  box-shadow: 0 4px 10px -4px rgba(0, 0, 0, 0.6);
+}
+
+.dtw__remove svg {
+  width: 11px;
+  height: 11px;
+}
+
+.dtw__resize {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+}
+
+.dtw__resize::after {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 7px;
+  height: 7px;
+  content: '';
+  border-right: 2px solid rgba(255, 255, 255, 0.3);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 0 0 2px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.dtw:hover .dtw__resize::after {
+  opacity: 1;
+}
+
+[data-theme='light'] .dtw__resize::after {
+  border-color: rgba(23, 19, 15, 0.35);
+}
+
+.dt-widgets.is-editing .dtw {
+  cursor: default;
+  animation: dtw-jiggle 0.28s ease-in-out infinite alternate;
+}
+
+.dt-widgets.is-editing .dtw__remove {
+  display: grid;
+}
+
+.dtw.is-widget-hidden {
+  display: none;
+}
+
+@keyframes dtw-jiggle {
+  from {
+    transform: rotate(-0.6deg);
+  }
+  to {
+    transform: rotate(0.6deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dt-widgets.is-editing .dtw {
+    animation: none;
+  }
+}
+
+.dtw__label {
+  margin: 0 0 0.4rem;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.dtw--about .dtw__lede {
+  margin: 0 0 0.9rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.dtw__stats {
+  display: flex;
+  gap: 1.6rem;
+  margin: 0;
+}
+
+.dtw__stats dt {
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.dtw__stats dd {
+  margin: 0.2rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: #fff;
+}
+
+.dtw__clocks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+}
+
+.dtw__clock {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.dtw__clock b {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.dtw__dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  background: var(--dot);
+  border-radius: 50%;
+}
+
+.dtw__cal-dow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin: 0.5rem 0 0.3rem;
+  font-size: 0.58rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.dtw__cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+  font-size: 0.72rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.dtw__cal-grid span {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.dtw__cal-grid span.is-today {
+  color: #fff;
+  font-weight: 600;
+  background: var(--copper);
+}
+
+.dtw__cal-cta {
+  display: block;
+  margin: 0.65rem 0 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--amber);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.dtw__cal-cta:hover {
+  text-decoration: underline;
+}
+
+.dtw__stat-num {
+  margin: 0.3rem 0 0.15rem;
+  font-family: var(--font-display);
+  font-size: 2.3rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.dtw__stat-sub {
+  margin: 0;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dtw__journal-title {
+  margin: 0.3rem 0 0.4rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #fff;
+}
+
+.dtw__journal-meta {
+  margin: 0;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dtw__wx-temp {
+  margin: 0.2rem 0 0.2rem;
+  font-family: var(--font-display);
+  font-size: 2.6rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.dtw__wx-desc {
+  margin: 0;
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.dtw__music-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 0.3rem;
+}
+
+.dtw__music-art {
+  display: block;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0 6px 14px -7px rgba(0, 0, 0, 0.7);
+}
+
+.dtw__music-art .icon-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.dtw__music-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.dtw__music-title {
+  margin: 0;
+  overflow: hidden;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #fff;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dtw__music-artist {
+  margin: 0.1rem 0 0;
+  overflow: hidden;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dtw__music-controls {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.dtw__music-btn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.07);
+  border: 0;
+  border-radius: 50%;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.dtw__music-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.dtw__music-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.dtw__music-btn--play {
+  width: 38px;
+  height: 38px;
+  color: #1a1305;
+  background: var(--amber);
+}
+
+.dtw__music-btn--play:hover {
+  background: var(--amber);
+  opacity: 0.9;
+}
+
+.dtw__music-btn--play svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* ---------------------------------------- widget drawer additions --- */
+
+.dtw--quote .dtw__quote-text {
+  margin: 0.3rem 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 0.98rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: #fff;
+}
+
+.dtw--quote .dtw__quote-by {
+  margin: 0;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dtw--quote .dtw__quote-by b {
+  color: #fff;
+  font-weight: 600;
+}
+
+.dtw__ig-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 0.3rem;
+}
+
+.dtw__ig-img {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.dtw__ig-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.dtw__ig-title {
+  margin: 0;
+  overflow: hidden;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #fff;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dtw__ig-sub {
+  margin: 0.1rem 0 0;
+  overflow: hidden;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.5);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+[data-theme='light'] .dtw--quote .dtw__quote-text,
+[data-theme='light'] .dtw--quote .dtw__quote-by b,
+[data-theme='light'] .dtw__ig-title {
+  color: #17130f;
+}
+
+[data-theme='light'] .dtw--quote .dtw__quote-by,
+[data-theme='light'] .dtw__ig-sub {
+  color: rgba(23, 19, 15, 0.55);
+}
+
+/* ------------------------------------------------------ desktop icons -- */
+
+.dt-icons-rail {
+  position: absolute;
+  top: 44px;
+  right: 1.2rem;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.7rem;
+  pointer-events: none;
+}
+
+.dt-dicon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  width: 86px;
+  padding: 0.5rem 0.4rem 0.4rem;
+  cursor: grab;
+  user-select: none;
+  background: none;
+  border: 0;
+  border-radius: 10px;
+  pointer-events: auto;
+}
+
+.dt-dicon.is-dragging {
+  cursor: grabbing;
+}
+
+.dt-dicon.is-selected {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.dt-dicon__art {
+  display: block;
+  width: 46px;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.55));
+}
+
+.dt-dicon__art svg {
+  display: block;
+  width: 100%;
+}
+
+.dt-dicon__label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
 }
 
 /* -------------------------------------------------------------------- dock -- */
@@ -215,6 +1394,10 @@ html.os-desktop body {
   position: absolute;
   inset: 28px 0 0 0;
   z-index: 2;
+  /* The layer spans the whole desktop even where there's no window in it —
+     let clicks fall through to widgets/wallpaper underneath by default,
+     and only claim them back inside an actual window. */
+  pointer-events: none;
 }
 
 .dt-window {
@@ -222,6 +1405,7 @@ html.os-desktop body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  pointer-events: auto;
   background:
     radial-gradient(26rem 20rem at 85% -8%, color-mix(in srgb, var(--tint-a, var(--amber)) 22%, transparent), transparent 62%),
     rgba(20, 17, 14, 0.86);
@@ -238,6 +1422,79 @@ html.os-desktop body {
   left: 10px !important;
   width: calc(100% - 20px) !important;
   height: calc(100% - 20px) !important;
+}
+
+.dt-window.is-maxed .dt-window__resize {
+  display: none;
+}
+
+/* Sit fully inside the border, not overhanging it — the window itself
+   clips overflow, so a handle positioned outside the box would just be
+   invisible and unclickable. */
+.dt-window__resize {
+  position: absolute;
+  z-index: 2;
+}
+
+.dt-window__resize[data-resize='n'] {
+  top: 0;
+  right: 12px;
+  left: 12px;
+  height: 6px;
+  cursor: ns-resize;
+}
+
+.dt-window__resize[data-resize='s'] {
+  right: 12px;
+  bottom: 0;
+  left: 12px;
+  height: 6px;
+  cursor: ns-resize;
+}
+
+.dt-window__resize[data-resize='e'] {
+  top: 12px;
+  bottom: 12px;
+  right: 0;
+  width: 6px;
+  cursor: ew-resize;
+}
+
+.dt-window__resize[data-resize='w'] {
+  top: 12px;
+  bottom: 12px;
+  left: 0;
+  width: 6px;
+  cursor: ew-resize;
+}
+
+.dt-window__resize--corner {
+  width: 12px;
+  height: 12px;
+}
+
+.dt-window__resize[data-resize='ne'] {
+  top: 0;
+  right: 0;
+  cursor: nesw-resize;
+}
+
+.dt-window__resize[data-resize='nw'] {
+  top: 0;
+  left: 0;
+  cursor: nwse-resize;
+}
+
+.dt-window__resize[data-resize='se'] {
+  right: 0;
+  bottom: 0;
+  cursor: nwse-resize;
+}
+
+.dt-window__resize[data-resize='sw'] {
+  bottom: 0;
+  left: 0;
+  cursor: nesw-resize;
 }
 
 .dt-window__bar {
@@ -323,6 +1580,7 @@ html.os-desktop body {
   min-height: 0;
   padding: 1.15rem 1.3rem 1.6rem;
   overflow-y: auto;
+  overflow-x: hidden;
   overscroll-behavior: contain;
 }
 
@@ -448,6 +1706,68 @@ html.os-desktop body {
   -webkit-box-orient: vertical;
 }
 
+/* ------------------------------------------------- settings (desktop) -- */
+
+/* Same two-pane grammar as Finder (.fd) — a category sidebar plus a detail
+   pane — since that's the actual macOS System Settings layout, just with
+   Beard Bros' own content and amber accent instead of Apple's blue. */
+.st2 {
+  display: flex;
+  height: 100%;
+}
+
+.st2__sidebar {
+  flex: 0 0 150px;
+  padding: 0.9rem 0.6rem;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: inset -1px 0 0 var(--line);
+}
+
+.st2__nav {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.st2__nav button {
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  font: inherit;
+  font-size: 0.8rem;
+  text-align: left;
+  color: rgba(236, 229, 216, 0.75);
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-radius: 7px;
+}
+
+.st2__nav button[aria-current='true'] {
+  color: var(--bone);
+  background: var(--amber);
+  background: color-mix(in srgb, var(--amber) 85%, transparent);
+}
+
+.st2__detail {
+  flex: 1;
+  min-width: 0;
+  padding: 1rem 1.4rem 1.6rem;
+  overflow-y: auto;
+}
+
+[data-theme='light'] .st2__sidebar {
+  background: rgba(23, 19, 15, 0.03);
+}
+
+[data-theme='light'] .st2__nav button {
+  color: rgba(23, 19, 15, 0.7);
+}
+
+[data-theme='light'] .st2__nav button[aria-current='true'] {
+  color: #1a1305;
+}
+
 /* ---------------------------------------------------------------- terminal -- */
 
 .tm {
@@ -497,4 +1817,324 @@ html.os-desktop body {
   background: none;
   border: 0;
   outline: none;
+}
+
+/* ==================================================================
+   Light mode — Terminal is deliberately left alone: a real terminal
+   keeps its own dark theme regardless of system appearance.
+   ================================================================== */
+
+[data-theme='light'] html.os-desktop body {
+  color: #17130f;
+  background: #ece5d8;
+}
+
+[data-theme='light'].dt-desktop,
+[data-theme='light'] .dt-desktop {
+  color: #17130f;
+}
+
+[data-theme='light'] .dt-wallpaper {
+  background:
+    radial-gradient(46rem 34rem at 82% -6%, rgba(255, 175, 110, 0.55), transparent 58%),
+    radial-gradient(40rem 40rem at 6% 18%, rgba(210, 150, 200, 0.4), transparent 60%),
+    radial-gradient(44rem 34rem at 92% 46%, rgba(232, 196, 120, 0.35), transparent 58%),
+    radial-gradient(50rem 40rem at 42% 108%, rgba(160, 140, 210, 0.32), transparent 62%),
+    linear-gradient(168deg, #f2e9da 0%, #ece1cf 48%, #e7dac4 100%);
+}
+
+[data-theme='light'] .dt-wallpaper[data-preset='1'] {
+  background:
+    radial-gradient(46rem 34rem at 82% -6%, rgba(120, 180, 255, 0.45), transparent 58%),
+    radial-gradient(40rem 40rem at 6% 18%, rgba(120, 220, 210, 0.35), transparent 60%),
+    radial-gradient(44rem 34rem at 92% 46%, rgba(170, 150, 255, 0.3), transparent 58%),
+    linear-gradient(168deg, #e8eef5 0%, #dfe8f0 48%, #d6e2ec 100%);
+}
+
+[data-theme='light'] .dt-wallpaper[data-preset='2'] {
+  background:
+    radial-gradient(46rem 34rem at 82% -6%, rgba(160, 210, 120, 0.45), transparent 58%),
+    radial-gradient(40rem 40rem at 6% 18%, rgba(230, 190, 110, 0.35), transparent 60%),
+    linear-gradient(168deg, #eef2e3 0%, #e6ecd8 48%, #dde5cb 100%);
+}
+
+[data-theme='light'] .dt-wallpaper[data-preset='3'] {
+  background:
+    radial-gradient(46rem 34rem at 82% -6%, rgba(120, 120, 130, 0.12), transparent 58%),
+    linear-gradient(168deg, #eeece7 0%, #e6e3dc 48%, #dedad1 100%);
+}
+
+[data-theme='light'] .dt-boot {
+  background: #ece5d8;
+}
+
+[data-theme='light'] .dt-boot__mark svg {
+  stroke: #17130f;
+}
+
+[data-theme='light'] .dt-boot__word {
+  color: #17130f;
+}
+
+[data-theme='light'] .dt-boot__bar {
+  background: rgba(23, 19, 15, 0.14);
+}
+
+[data-theme='light'] .dt-menubar {
+  color: rgba(23, 19, 15, 0.92);
+  background: rgba(255, 251, 244, 0.65);
+  box-shadow: inset 0 -1px 0 rgba(23, 19, 15, 0.08);
+}
+
+[data-theme='light'] .dt-menubar__status,
+[data-theme='light'] .dt-menubar__date,
+[data-theme='light'] .dt-menubar__time {
+  color: rgba(23, 19, 15, 0.65);
+}
+
+[data-theme='light'] .dt-menu__trigger {
+  color: rgba(23, 19, 15, 0.72);
+}
+
+[data-theme='light'] .dt-menu__trigger--brand {
+  color: rgba(23, 19, 15, 0.94);
+}
+
+[data-theme='light'] .dt-menu.is-open .dt-menu__trigger,
+[data-theme='light'] .dt-menu__trigger:hover {
+  color: #17130f;
+  background: rgba(23, 19, 15, 0.1);
+}
+
+[data-theme='light'] .dt-menu__panel,
+[data-theme='light'] .dt-ctx-menu {
+  background: rgba(255, 253, 249, 0.94);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 20px 50px -20px rgba(23, 19, 15, 0.35);
+}
+
+[data-theme='light'] .dt-menu__item {
+  color: rgba(23, 19, 15, 0.88);
+}
+
+[data-theme='light'] .dt-menu__item:hover:not(:disabled) {
+  color: #fff;
+  background: var(--copper);
+}
+
+[data-theme='light'] .dt-menu__item:disabled {
+  color: rgba(23, 19, 15, 0.32);
+}
+
+[data-theme='light'] .dt-menu__kbd {
+  color: rgba(23, 19, 15, 0.4);
+}
+
+[data-theme='light'] .dt-menu__sep {
+  background: rgba(23, 19, 15, 0.1);
+}
+
+[data-theme='light'] .dt-icon {
+  color: rgba(23, 19, 15, 0.82);
+}
+
+[data-theme='light'] .dt-icon:hover,
+[data-theme='light'] .dt-icon.is-open {
+  color: #17130f;
+  background: rgba(23, 19, 15, 0.1);
+}
+
+[data-theme='light'] .dt-icon.is-off {
+  color: rgba(23, 19, 15, 0.38);
+}
+
+[data-theme='light'] .dt-cc__sheet {
+  background: rgba(255, 253, 249, 0.94);
+}
+
+[data-theme='light'] .dt-cc__toggle,
+[data-theme='light'] .dt-cc__slider {
+  background: rgba(23, 19, 15, 0.06);
+}
+
+[data-theme='light'] .dt-cc__toggle-icon,
+[data-theme='light'] .dt-cc__slider-head {
+  color: rgba(23, 19, 15, 0.65);
+}
+
+[data-theme='light'] .dt-cc__toggle-label {
+  color: rgba(23, 19, 15, 0.55);
+}
+
+[data-theme='light'] .dt-cc__slider-val {
+  color: rgba(23, 19, 15, 0.4);
+}
+
+[data-theme='light'] .dt-cc__range {
+  background: rgba(23, 19, 15, 0.15);
+}
+
+[data-theme='light'] .dt-cc__widgets-picker,
+[data-theme='light'] .dt-cc__radio {
+  background: rgba(23, 19, 15, 0.06);
+}
+
+[data-theme='light'] .dt-cc__widgets-label,
+[data-theme='light'] .dt-cc__radio-tags {
+  color: rgba(23, 19, 15, 0.5);
+}
+
+[data-theme='light'] .dt-cc__widgets-chip {
+  color: rgba(23, 19, 15, 0.75);
+  background: rgba(23, 19, 15, 0.08);
+}
+
+[data-theme='light'] .dt-cc__widgets-chip:hover {
+  color: #1a1305;
+  background: var(--amber);
+}
+
+[data-theme='light'] .dt-cc__radio-station {
+  color: rgba(23, 19, 15, 0.85);
+}
+
+[data-theme='light'] .dt-cc__radio-btn {
+  color: rgba(23, 19, 15, 0.75);
+  background: rgba(23, 19, 15, 0.08);
+}
+
+[data-theme='light'] .dt-cc__radio-btn--play {
+  color: #1a1305;
+  background: var(--amber);
+}
+
+[data-theme='light'] .dt-toast {
+  color: #17130f;
+  background: rgba(255, 253, 249, 0.92);
+}
+
+[data-theme='light'] .dtw {
+  background: rgba(255, 253, 248, 0.72);
+  border: 1px solid rgba(23, 19, 15, 0.08);
+  box-shadow: 0 22px 44px -30px rgba(23, 19, 15, 0.35);
+}
+
+[data-theme='light'] .dtw__label,
+[data-theme='light'] .dtw__stats dt,
+[data-theme='light'] .dtw__cal-dow,
+[data-theme='light'] .dtw__stat-sub,
+[data-theme='light'] .dtw__journal-meta,
+[data-theme='light'] .dtw__wx-desc,
+[data-theme='light'] .dtw__music-artist {
+  color: rgba(23, 19, 15, 0.55);
+}
+
+[data-theme='light'] .dtw--about .dtw__lede {
+  color: rgba(23, 19, 15, 0.85);
+}
+
+[data-theme='light'] .dtw__stats dd,
+[data-theme='light'] .dtw__clock b,
+[data-theme='light'] .dtw__stat-num,
+[data-theme='light'] .dtw__journal-title,
+[data-theme='light'] .dtw__wx-temp,
+[data-theme='light'] .dtw__music-title {
+  color: #17130f;
+}
+
+[data-theme='light'] .dtw__clock {
+  color: rgba(23, 19, 15, 0.75);
+}
+
+[data-theme='light'] .dtw__cal-grid {
+  color: rgba(23, 19, 15, 0.8);
+}
+
+[data-theme='light'] .dtw__music-btn {
+  color: rgba(23, 19, 15, 0.7);
+  background: rgba(23, 19, 15, 0.06);
+}
+
+[data-theme='light'] .dtw__music-btn:hover {
+  color: #17130f;
+  background: rgba(23, 19, 15, 0.12);
+}
+
+[data-theme='light'] .dt-dicon__label {
+  color: rgba(23, 19, 15, 0.9);
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.5);
+}
+
+[data-theme='light'] .dt-dicon.is-selected {
+  background: rgba(23, 19, 15, 0.12);
+}
+
+[data-theme='light'] .dt-dock {
+  background: rgba(255, 253, 248, 0.55);
+}
+
+[data-theme='light'] .dt-dock__sep {
+  background: rgba(23, 19, 15, 0.14);
+}
+
+[data-theme='light'] .dt-dock__item[data-open]::after {
+  background: rgba(23, 19, 15, 0.7);
+}
+
+[data-theme='light'] .dt-window {
+  background:
+    radial-gradient(26rem 20rem at 85% -8%, color-mix(in srgb, var(--tint-a, var(--amber)) 16%, transparent), transparent 62%),
+    rgba(255, 253, 249, 0.92);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset, 0 30px 70px -20px rgba(23, 19, 15, 0.3);
+}
+
+[data-theme='light'] .dt-window__bar {
+  background: rgba(23, 19, 15, 0.03);
+  box-shadow: inset 0 -1px 0 rgba(23, 19, 15, 0.07);
+}
+
+[data-theme='light'] .dt-window:not(.is-active) .dt-window__lights button {
+  background: rgba(23, 19, 15, 0.15);
+}
+
+[data-theme='light'] .dt-window__title {
+  color: rgba(23, 19, 15, 0.85);
+}
+
+[data-theme='light'] .dt-window:not(.is-active) .dt-window__title {
+  color: rgba(23, 19, 15, 0.4);
+}
+
+[data-theme='light'] .dt-window__body {
+  color: #17130f;
+}
+
+[data-theme='light'] .fd__sidebar {
+  background: rgba(23, 19, 15, 0.03);
+  box-shadow: inset -1px 0 0 rgba(23, 19, 15, 0.08);
+}
+
+[data-theme='light'] .fd__group,
+[data-theme='light'] .fd__crumb {
+  color: rgba(23, 19, 15, 0.42);
+}
+
+[data-theme='light'] .fd__side button {
+  color: rgba(23, 19, 15, 0.75);
+}
+
+[data-theme='light'] .fd__side button[aria-current='true'] {
+  color: #17130f;
+  background: rgba(23, 19, 15, 0.08);
+}
+
+[data-theme='light'] .fd__side button span {
+  color: rgba(23, 19, 15, 0.35);
+}
+
+[data-theme='light'] .fd__file:hover {
+  background: rgba(23, 19, 15, 0.06);
+}
+
+[data-theme='light'] .fd__file-name {
+  color: rgba(23, 19, 15, 0.8);
 }

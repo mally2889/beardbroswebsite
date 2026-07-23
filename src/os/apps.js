@@ -2,6 +2,19 @@ import { services } from '../data/services.js';
 import { projectsData } from '../data/projects-full.js';
 import { caseStudies } from '../data/case-studies.js';
 import { journal } from '../data/journal.js';
+import { reelsByProject } from '../data/reels.js';
+import { mediaByProject } from '../data/portfolio-media.js';
+import { testimonials } from '../data/testimonials.js';
+import { agencyNotes } from '../data/agency-notes.js';
+import { websites } from '../data/websites.js';
+import {
+  radioAudio,
+  radioToggle,
+  radioNext,
+  setRadioVolume,
+  nowPlayingStation,
+  loadStationArt,
+} from './radio.js';
 import '../styles/phone-os-apps.css';
 
 /**
@@ -15,6 +28,46 @@ import '../styles/phone-os-apps.css';
 
 const esc = (s) =>
   String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+
+/*
+ * `preload="metadata"` only promises duration/dimensions, not a painted
+ * frame — plenty of browsers (Safari especially) leave a bare <video> fully
+ * black until it's actually played. Every clip in the OS (feed, "from the
+ * shoot" grid, Safari's project slider) gets a real poster instead: seek a
+ * hair into the file to force that frame to decode, then snapshot it onto
+ * a canvas. Idempotent and safe to call more than once per element.
+ */
+const capturePoster = (video) => {
+  if (video.dataset.posterWired) return;
+  video.dataset.posterWired = '1';
+  const grab = () => {
+    try {
+      const c = document.createElement('canvas');
+      c.width = video.videoWidth || 640;
+      c.height = video.videoHeight || 640;
+      c.getContext('2d').drawImage(video, 0, 0, c.width, c.height);
+      video.poster = c.toDataURL('image/jpeg', 0.72);
+    } catch {
+      /* frame not decoded yet, or a canvas taint — leave it posterless */
+    }
+  };
+  /* Even at readyState HAVE_ENOUGH_DATA, a video that's never been played
+     or seeked hasn't necessarily decoded/presented any frame yet — a lot of
+     clips open on a black fade-in, so grabbing frame 0 as-is often just
+     captures genuine black. Explicitly seeking forces that specific frame
+     to decode before the canvas reads it. */
+  const seekAndGrab = () => {
+    video.addEventListener('seeked', grab, { once: true });
+    try {
+      video.currentTime = Math.min(0.3, (video.duration || 0.6) / 2);
+    } catch {
+      video.removeEventListener('seeked', grab);
+      grab();
+    }
+  };
+  if (video.readyState >= 1) seekAndGrab();
+  else video.addEventListener('loadedmetadata', seekAndGrab, { once: true });
+};
 
 const svg = (path, w = 1.9) =>
   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}"
@@ -37,6 +90,26 @@ const field = (id, from, to) => `
 
 const art = (inner) =>
   `<svg class="icon-art" viewBox="0 0 100 100" aria-hidden="true">${inner}</svg>`;
+
+/**
+ * Manual icon overrides — drop a same-name PNG in /public/icons/ (e.g.
+ * icons/safari.png) and it replaces the built-in artwork on both the
+ * desktop Dock and the phone Home Screen/Dock, no code change needed. Every
+ * icon slot renders its normal SVG first (so nothing ever looks broken),
+ * then this probes for a custom file and swaps it in if one loads.
+ * `root` is any container just painted with one or more `[data-icon-id]`
+ * tiles (a whole Dock, a whole page of Home Screen icons, etc.).
+ */
+export function enhanceIconArt(root) {
+  root.querySelectorAll('[data-icon-id]').forEach((el) => {
+    const id = el.dataset.iconId;
+    const probe = new Image();
+    probe.onload = () => {
+      el.innerHTML = `<img class="icon-art-custom" src="/icons/${id}.png" alt="" />`;
+    };
+    probe.src = `/icons/${id}.png`;
+  });
+}
 
 /** Compass: a glass ring, tick marks, and a two-tone needle. */
 const ART_SAFARI = art(`
@@ -158,17 +231,6 @@ const ART_WEATHER = art(`
   <circle cx="62" cy="38" r="16" fill="#ffd60a"/>
   <path d="M30 72a15 15 0 0 1 2-29.6 20 20 0 0 1 38 4.9A13 13 0 0 1 67 72z" fill="#8e8e93" opacity=".9"/>`);
 
-/** Voice Memos: a radial waveform bursting from a centre dot on a dark field. */
-const ART_MEMOS = art(`
-  ${field('g-mm', '#2c2c2e', '#1c1c1e')}
-  <g stroke-linecap="round" stroke-width="7">
-    <line x1="50" y1="32" x2="50" y2="68" stroke="#fc3158"/>
-    <line x1="37" y1="39" x2="37" y2="61" stroke="#fff"/>
-    <line x1="63" y1="39" x2="63" y2="61" stroke="#fff"/>
-    <line x1="24" y1="44" x2="24" y2="56" stroke="#fff" opacity=".65"/>
-    <line x1="76" y1="44" x2="76" y2="56" stroke="#fff" opacity=".65"/>
-  </g>`);
-
 /** Files: a blue folder on a pale field. */
 const ART_FILES = art(`
   ${field('g-fl', '#2c2c2e', '#1c1c1e')}
@@ -221,14 +283,24 @@ const safari = {
       <div class="sf" data-sf>
         <div class="sf__bar">
           <span class="sf__lock">${svg('<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7.5a4 4 0 018 0V11"/>', 2)}</span>
-          <span class="sf__url" data-sf-url>beardbros.in/portfolio</span>
+          <input class="sf__url" data-sf-url type="text" value="beardbros.in/portfolio"
+                 spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Address" />
+          <button type="button" class="sf__go" data-sf-go aria-label="Go">${svg('<path d="M5 12h14M13 6l6 6-6 6"/>', 2)}</button>
         </div>
-        <div class="sf__view" data-sf-view>${bookmarks()}</div>
+        <div class="sf__bookmarks" data-sf-bookmarks>
+          <button type="button" data-sf-bm="reading">Reading List</button>
+          <button type="button" data-sf-bm="suggestions">Suggestions</button>
+          <button type="button" data-sf-bm="websites">Websites</button>
+          <button type="button" data-sf-bm-proj="beardo">Beardo</button>
+          <button type="button" data-sf-bm-proj="naturevibe-india">Naturevibe</button>
+          <button type="button" data-sf-bm-reading="kids-nutrition">Early Foods</button>
+        </div>
+        <div class="sf__view" data-sf-view>${sfHome()}</div>
         <div class="sf__toolbar">
           <button type="button" data-sf-back aria-label="Back" disabled>
             ${svg('<path d="M15 5l-7 7 7 7"/>', 2)}
           </button>
-          <button type="button" data-sf-home aria-label="Bookmarks">
+          <button type="button" data-sf-home aria-label="Home">
             ${svg('<path d="M6 4h12v17l-6-4.5L6 21z"/>', 1.9)}
           </button>
         </div>
@@ -241,68 +313,406 @@ const safari = {
     const back = root.querySelector('[data-sf-back]');
 
     const home = () => {
-      view.innerHTML = bookmarks();
+      view.innerHTML = sfHome();
       view.scrollTop = 0;
-      url.textContent = 'beardbros.in/portfolio';
+      url.value = 'beardbros.in/portfolio';
       back.disabled = true;
     };
 
+    const openProject = (pr) => {
+      view.innerHTML = projectPage(pr);
+      view.scrollTop = 0;
+      url.value = `beardbros.in/portfolio/${pr.slug}`;
+      back.disabled = false;
+      wireSlider(view);
+    };
+
+    const openReading = (cs) => {
+      view.innerHTML = csDetail(cs);
+      view.scrollTop = 0;
+      url.value = `beardbros.in/reading/${cs.slug}`;
+      back.disabled = false;
+    };
+
+    const openWebsite = (w) => {
+      view.innerHTML = websitePage(w);
+      view.scrollTop = 0;
+      url.value = w.url.replace(/^https?:\/\//, '');
+      back.disabled = false;
+    };
+
+    /*
+     * A real, typeable address bar — but sandboxed to the site's own fake
+     * URL space rather than actually fetching the internet. Most real
+     * sites refuse to be framed at all (X-Frame-Options/CSP), so a genuine
+     * iframe-based browser would mostly show broken/blank pages for any
+     * real domain typed in — worse for the illusion than not having it.
+     * Matching a project/case-study by slug or client name and otherwise
+     * showing Safari's own "can't open the page" state keeps the address
+     * bar meaningfully interactive without ever pretending to browse
+     * somewhere it can't actually reach.
+     */
+    const normalizeQuery = (raw) =>
+      raw
+        .trim()
+        .toLowerCase()
+        .replace(/^https?:\/\//, '')
+        .replace(/^beardbros\.in\/?/, '')
+        .replace(/^\/+|\/+$/g, '');
+
+    const resolveAndGo = (raw) => {
+      const q = normalizeQuery(raw);
+      if (!q || q === 'portfolio' || q === 'home') {
+        home();
+        return;
+      }
+
+      const afterPortfolio = q.replace(/^portfolio\//, '');
+      const afterReading = q.replace(/^reading\//, '');
+
+      const csExact = caseStudies.find((c) => c.slug === afterReading || c.slug === q);
+      if (csExact) {
+        openReading(csExact);
+        return;
+      }
+
+      const prExact = projectsData.find((p) => p.slug === afterPortfolio || p.slug === q);
+      if (prExact) {
+        openProject(prExact);
+        return;
+      }
+
+      const siteMatch = websites.find(
+        (w) => siteHost(w.url).toLowerCase() === raw.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/+$/, ''),
+      );
+      if (siteMatch) {
+        openWebsite(siteMatch);
+        return;
+      }
+
+      const needle = q.replace(/-/g, ' ');
+      const siteFuzzy = websites.find((w) => w.name.toLowerCase().includes(needle) || needle.includes(w.name.toLowerCase()));
+      if (siteFuzzy) {
+        openWebsite(siteFuzzy);
+        return;
+      }
+      const prFuzzy = projectsData.find(
+        (p) => p.client.toLowerCase().includes(needle) || needle.includes(p.client.toLowerCase()),
+      );
+      if (prFuzzy) {
+        openProject(prFuzzy);
+        return;
+      }
+
+      const csFuzzy = caseStudies.find((c) => c.client.toLowerCase().includes(needle));
+      if (csFuzzy) {
+        openReading(csFuzzy);
+        return;
+      }
+
+      view.innerHTML = `
+        <div class="sf__notfound">
+          <p class="sf__notfound-title">Safari can’t open the page</p>
+          <p class="sf__notfound-sub">“${esc(raw)}” isn’t a page on beardbros.in.</p>
+          <button type="button" class="sf__notfound-home" data-sf-home-link>Go to bookmarks</button>
+        </div>`;
+      view.scrollTop = 0;
+      url.value = `beardbros.in/${q}`;
+      back.disabled = false;
+    };
+
     view.addEventListener('click', (e) => {
+      const mute = e.target.closest('[data-pj-mute]');
+      if (mute) {
+        const vid = mute.closest('.pj__slide')?.querySelector('video');
+        if (vid) {
+          vid.muted = !vid.muted;
+          mute.setAttribute('aria-pressed', String(vid.muted));
+          mute.innerHTML = vid.muted ? ICON_SPEAKER_MUTED : ICON_SPEAKER_ON;
+        }
+        return;
+      }
+
+      const prev = e.target.closest('[data-pj-prev]');
+      const next = e.target.closest('[data-pj-next]');
+      if (prev || next) {
+        const track = view.querySelector('[data-pj-track]');
+        track?.scrollBy({ left: (prev ? -1 : 1) * track.clientWidth, behavior: 'smooth' });
+        return;
+      }
+
+      if (e.target.closest('[data-reading-back]') || e.target.closest('[data-sf-home-link]')) {
+        home();
+        return;
+      }
+
+      const reading = e.target.closest('[data-reading]');
+      if (reading) {
+        const cs = caseStudies.find((x) => x.slug === reading.dataset.reading);
+        if (cs) openReading(cs);
+        return;
+      }
+
+      const site = e.target.closest('[data-site]');
+      if (site) {
+        const w = websites.find((x) => x.url === site.dataset.site);
+        if (w) openWebsite(w);
+        return;
+      }
+
       const row = e.target.closest('[data-proj]');
       if (!row) return;
       const pr = projectsData.find((x) => x.slug === row.dataset.proj);
-      if (!pr) return;
-      view.innerHTML = projectPage(pr);
-      view.scrollTop = 0;
-      url.textContent = `beardbros.in/portfolio/${pr.slug}`;
-      back.disabled = false;
+      if (pr) openProject(pr);
     });
+
+    root.querySelector('[data-sf-bookmarks]').addEventListener('click', (e) => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      if (b.dataset.sfBm === 'reading') {
+        home();
+        return;
+      }
+      if (b.dataset.sfBm === 'suggestions') {
+        home();
+        view.querySelector('.sg__grid')?.scrollIntoView({ block: 'start' });
+        return;
+      }
+      if (b.dataset.sfBm === 'websites') {
+        home();
+        view.querySelector('.ws__grid')?.scrollIntoView({ block: 'start' });
+        return;
+      }
+      if (b.dataset.sfBmProj) {
+        const pr = projectsData.find((x) => x.slug === b.dataset.sfBmProj);
+        if (pr) openProject(pr);
+        return;
+      }
+      if (b.dataset.sfBmReading) {
+        const cs = caseStudies.find((x) => x.slug === b.dataset.sfBmReading);
+        if (cs) openReading(cs);
+      }
+    });
+
+    url.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      resolveAndGo(url.value);
+      url.blur();
+    });
+    root.querySelector('[data-sf-go]').addEventListener('click', () => resolveAndGo(url.value));
+    url.addEventListener('focus', () => url.select());
 
     back.addEventListener('click', home);
     root.querySelector('[data-sf-home]').addEventListener('click', home);
   },
 };
 
-const bookmarks = () => {
-  const groups = [...new Set(projectsData.map((p) => p.discipline))];
-  return `
-    <p class="sf__count">Bookmarks · ${projectsData.length} projects</p>
-    ${groups
+/** Reading List — real Safari's own reading list, filled with case studies
+    instead of saved articles. */
+const readingListSection = () => `
+  <p class="sf__section-label">Reading List</p>
+  <ul class="rl__list">
+    ${caseStudies
       .map(
-        (g) => `
-      <p class="bm__group">${esc(g)}</p>
-      <ul class="bm__list">
-        ${projectsData
-          .filter((p) => p.discipline === g)
-          .map(
-            (p) => `
-          <li>
-            <button type="button" data-proj="${p.slug}">
-              <img class="bm__fav" src="${p.images[0]}" alt="" loading="lazy" decoding="async" />
-              <span class="bm__meta">
-                <b>${esc(p.client)}</b>
-                <em>${esc(p.summary)}</em>
-              </span>
-              <span class="bm__n">${p.images.length}</span>
-            </button>
-          </li>`,
-          )
-          .join('')}
-      </ul>`,
+        (c) => `
+      <li>
+        <button type="button" class="rl__row" data-reading="${c.slug}">
+          <span class="rl__meta">
+            <b class="rl__title">${esc(c.client)}</b>
+            <em class="rl__sub">${esc(c.sector)} · ${esc(c.year)}</em>
+          </span>
+          <span class="rl__dek">${esc(c.dek)}</span>
+          <span class="rl__read">${esc(c.read)} read</span>
+        </button>
+      </li>`,
       )
-      .join('')}`;
+      .join('')}
+  </ul>`;
+
+/** Client quotes — Voice Memos retired, the words themselves stand out here
+    instead, between the Reading List and the portfolio. */
+const quoteStrip = () => `
+  <p class="sf__section-label">What clients say</p>
+  <div class="qt__strip">
+    ${testimonials
+      .map(
+        (t) => `
+      <blockquote class="qt__card" style="--accent:${t.accent}">
+        <p class="qt__text">“${esc(t.quote)}”</p>
+        <footer class="qt__by"><b>${esc(t.author)}</b><span>${esc(t.role)}</span></footer>
+      </blockquote>`,
+      )
+      .join('')}
+  </div>`;
+
+/** Suggestions — Safari's own start-page "suggested links" grammar, big
+    tiles instead of a flat bookmarks list. */
+const suggestionsSection = () => `
+  <p class="sf__section-label">Suggestions · ${projectsData.length} projects</p>
+  <div class="sg__grid">
+    ${projectsData
+      .map(
+        (p) => `
+      <button type="button" class="sg__card" data-proj="${p.slug}">
+        <img class="sg__img" src="${p.images[0]}" alt="" loading="lazy" decoding="async" />
+        <span class="sg__meta">
+          <b class="sg__title">${esc(p.client)}</b>
+          <em class="sg__excerpt">${esc(p.summary)}</em>
+        </span>
+      </button>`,
+      )
+      .join('')}
+  </div>`;
+
+/** Websites — live client sites, opened in Safari via iframe instead of a
+    static screenshot, so they're actually browsable inside the OS. */
+const siteHost = (url) => {
+  try {
+    return new URL(url).host;
+  } catch {
+    return url;
+  }
 };
+
+const websitesSection = () => `
+  <p class="sf__section-label">Websites</p>
+  <div class="ws__grid">
+    ${websites
+      .map(
+        (w) => `
+      <button type="button" class="ws__card" data-site="${esc(w.url)}">
+        <span class="ws__glyph">${esc(w.name.slice(0, 1))}</span>
+        <span class="ws__meta">
+          <b class="ws__title">${esc(w.name)}</b>
+          <em class="ws__host">${esc(siteHost(w.url))}</em>
+        </span>
+      </button>`,
+      )
+      .join('')}
+  </div>`;
+
+const sfHome = () => `${readingListSection()}${quoteStrip()}${websitesSection()}${suggestionsSection()}`;
+
+/** A live client site, framed inline. Not every third-party site allows
+    itself to be embedded (X-Frame-Options/CSP), so the "open directly"
+    fallback link is always shown alongside the frame rather than only on
+    failure — there's no reliable way to detect a blocked frame from outside
+    its own origin. */
+const websitePage = (w) => `
+  <div class="ws__page">
+    <div class="ws__page-bar">
+      <b>${esc(w.name)}</b>
+      <a href="${esc(w.url)}" target="_blank" rel="noopener">Open directly ↗</a>
+    </div>
+    <div class="ws__frame-wrap">
+      <iframe class="ws__frame" src="${esc(w.url)}" loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              title="${esc(w.name)}"></iframe>
+    </div>
+  </div>`;
+
+/*
+ * A project with real local media (portfolio-media.js) gets a swipeable
+ * slider instead of one static hero — same idea as the Feed app's native
+ * tiles: real creative, shown in the site's own chrome rather than
+ * Instagram's. Single-slide projects just render the plain hero image,
+ * same as before, since a slider with one frame is only extra chrome.
+ */
+const pjSlide = (s, i) =>
+  s.kind === 'video'
+    ? `<div class="pj__slide">
+         <video data-autoplay src="${esc(s.src)}" muted loop playsinline preload="metadata"></video>
+         <button type="button" class="pj__slide-mute" data-pj-mute aria-pressed="true" aria-label="Unmute">${ICON_SPEAKER_MUTED}</button>
+       </div>`
+    : `<div class="pj__slide"><img src="${esc(s.src)}" alt="" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async" /></div>`;
+
+const pjMedia = (p) => {
+  const media = mediaByProject[p.slug];
+  const slides =
+    media && (media.images.length || media.videos.length)
+      ? [...media.images.map((src) => ({ kind: 'image', src })), ...media.videos.map((src) => ({ kind: 'video', src }))]
+      : [{ kind: 'image', src: p.images[0] }];
+
+  if (slides.length === 1) {
+    return `<img class="pj__hero" src="${slides[0].src}" alt="${esc(p.client)} creative" loading="eager" decoding="async" />`;
+  }
+
+  return `
+    <div class="pj__slider" data-pj-slider>
+      <div class="pj__slider-track" data-pj-track>${slides.map(pjSlide).join('')}</div>
+      <button type="button" class="pj__slider-nav pj__slider-nav--prev" data-pj-prev aria-label="Previous">
+        ${svg('<path d="M15 5l-7 7 7 7"/>', 2.4)}
+      </button>
+      <button type="button" class="pj__slider-nav pj__slider-nav--next" data-pj-next aria-label="Next">
+        ${svg('<path d="M9 5l7 7-7 7"/>', 2.4)}
+      </button>
+      <div class="pj__slider-dots" data-pj-dots>
+        ${slides.map((_, i) => `<span class="${i === 0 ? 'is-active' : ''}"></span>`).join('')}
+      </div>
+      <span class="pj__slider-count" data-pj-count>1 / ${slides.length}</span>
+    </div>`;
+};
+
+/** Keeps the dot rail and the "N / total" badge in sync with manual scroll,
+    not just the prev/next buttons — a swipe should update them too. */
+function wireSlider(root) {
+  const track = root.querySelector('[data-pj-track]');
+  if (!track) return;
+  const vids = [...track.querySelectorAll('video')];
+  vids.forEach(capturePoster);
+  const dots = [...root.querySelectorAll('[data-pj-dots] span')];
+  const count = root.querySelector('[data-pj-count]');
+  const total = track.children.length;
+  let settleTimer = null;
+
+  track.addEventListener('scroll', () => {
+    clearTimeout(settleTimer);
+    settleTimer = setTimeout(() => {
+      const i = Math.max(0, Math.min(total - 1, Math.round(track.scrollLeft / track.clientWidth)));
+      dots.forEach((d, idx) => d.classList.toggle('is-active', idx === i));
+      if (count) count.textContent = `${i + 1} / ${total}`;
+    }, 80);
+  });
+
+  /* Same idea as the Instagram feed: a slide's video only plays while it's
+     the one actually scrolled into view, so swiping past it doesn't leave
+     a paused-but-invisible clip and skipping straight to a later slide
+     doesn't leave an earlier one still playing underneath. */
+  if (vids.length) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((en) => {
+          if (en.isIntersecting) en.target.play().catch(() => {});
+          else en.target.pause();
+        });
+      },
+      { root: track, threshold: 0.6 },
+    );
+    vids.forEach((v) => io.observe(v));
+  }
+}
+
+/** A project's own YouTube video, embedded the same inline way Safari's
+    Websites section frames a live site — full-width, native player chrome. */
+const pjYoutube = (id) => `
+  <div class="ws__frame-wrap pj__yt">
+    <iframe class="ws__frame" src="https://www.youtube.com/embed/${esc(id)}"
+            loading="lazy" title="Project video"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen></iframe>
+  </div>`;
 
 const projectPage = (p) => `
   <article class="pj">
-    <img class="pj__hero" src="${p.images[0]}" alt="${esc(p.client)} creative"
-         loading="eager" decoding="async" />
+    ${pjMedia(p)}
     <header class="pj__head">
       <h3>${esc(p.client)}</h3>
       <p class="pj__disc">${esc(p.discipline)}</p>
       <p class="pj__sum">${esc(p.summary)}</p>
     </header>
     ${p.body ? p.body.map((t) => `<p class="app__p">${esc(t)}</p>`).join('') : ''}
+    ${p.youtube ? pjYoutube(p.youtube) : ''}
     <p class="pj__src">
       <a href="${p.source}" target="_blank" rel="noopener">View on beardbros.in</a>
     </p>
@@ -314,10 +724,10 @@ const notes = {
   label: 'Notes',
   hue: '#e8b04b',
   art: ART_NOTES,
-  title: 'Case Studies',
+  title: 'Notes',
 
   render() {
-    return `<div class="nt" data-nt><div class="nt__view" data-nt-view>${csList()}</div></div>`;
+    return `<div class="nt" data-nt><div class="nt__view" data-nt-view>${notesList()}</div></div>`;
   },
 
   mount(root) {
@@ -325,40 +735,56 @@ const notes = {
     view.addEventListener('click', (e) => {
       const row = e.target.closest('[data-note]');
       if (row) {
-        view.innerHTML = csDetail(caseStudies.find((x) => x.slug === row.dataset.note));
+        view.innerHTML = noteDetail(agencyNotes.find((x) => x.slug === row.dataset.note));
         view.scrollTop = 0;
         return;
       }
       if (e.target.closest('[data-note-back]')) {
-        view.innerHTML = csList();
+        view.innerHTML = notesList();
         view.scrollTop = 0;
       }
     });
   },
 };
 
-const csList = () => `
-  <p class="nt__header">${caseStudies.length} case studies</p>
+const notesList = () => `
+  <p class="nt__header">${agencyNotes.length} notes</p>
   <ul class="nt__list">
-    ${caseStudies
+    ${agencyNotes
       .map(
-        (c) => `
+        (n) => `
       <li>
-        <button type="button" data-note="${c.slug}">
-          <span class="nt__title">${esc(c.client)}</span>
-          <span class="nt__meta">${esc(c.sector)} · ${esc(c.year)}</span>
-          <span class="nt__preview">${esc(c.dek)}</span>
+        <button type="button" data-note="${n.slug}">
+          <span class="nt__title">${esc(n.title)}</span>
+          <span class="nt__meta">${esc(n.stamp)}</span>
+          <span class="nt__preview">${esc(n.body[0])}</span>
         </button>
       </li>`,
       )
       .join('')}
   </ul>`;
 
-const csDetail = (c) => `
+const noteDetail = (n) => `
   <button class="nt__back" type="button" data-note-back>
-    ${svg('<path d="M15 5l-7 7 7 7"/>', 2)} Case Studies
+    ${svg('<path d="M15 5l-7 7 7 7"/>', 2)} Notes
   </button>
-  <article class="nt__note" style="--accent:${c.accent}">
+  <article class="nt__note">
+    <h3>${esc(n.title)}</h3>
+    <p class="nt__stamp">${esc(n.stamp)}</p>
+    ${n.body
+      .map((t) => (t.startsWith('— ') ? `<p class="nt__item">${esc(t.slice(2))}</p>` : `<p>${esc(t)}</p>`))
+      .join('')}
+  </article>`;
+
+/*
+ * The long-read case-study view — moved here (still exported for Safari's
+ * Reading List, since case studies live there now, not in this app).
+ */
+const csDetail = (c) => `
+  <button class="nt__back" type="button" data-reading-back>
+    ${svg('<path d="M15 5l-7 7 7 7"/>', 2)} Reading List
+  </button>
+  <article class="nt__note cs__read" style="--accent:${c.accent}">
     <h3>${esc(c.client)}</h3>
     <p class="nt__stamp">${esc(c.sector)} · ${esc(c.year)} · ${esc(c.read)} read</p>
     <p class="nt__lede">${esc(c.dek)}</p>
@@ -429,7 +855,9 @@ const mail = {
 
 /* ----------------------------------------------------------- calendar --- */
 
-const SLOTS = ['09:30', '10:00', '10:30', '11:00', '14:00', '14:30', '15:00', '16:30'];
+/** Real booking link, shared with the desktop widget's "Book a 30 min call"
+    CTA — one source of truth rather than the URL living in two places. */
+export const CALENDLY_URL = 'https://calendly.com/mally-beardbros/discovery-call';
 
 const calendar = {
   label: 'Calendar',
@@ -439,76 +867,95 @@ const calendar = {
     '<rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3 10h18"/>',
   title: 'Book a call',
 
+  /* Calendly's own inline embed is designed to be framed (unlike most
+     third-party sites), so a real booking actually happens here rather
+     than the old fake day/slot picker — dates, times and confirmation are
+     all Calendly's live availability, not a demo. */
   render() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth();
-    const first = new Date(year, month, 1).getDay();
-    const days = new Date(year, month + 1, 0).getDate();
-    const today = now.getDate();
-
-    const cells = [];
-    for (let i = 0; i < (first + 6) % 7; i++) cells.push('<span></span>');
-
-    for (let d = 1; d <= days; d++) {
-      const dow = new Date(year, month, d).getDay();
-      const open = dow !== 0 && dow !== 6 && d >= today;
-      cells.push(
-        `<button type="button" data-day="${d}" ${open ? '' : 'disabled'}
-                 class="${d === today ? 'is-today' : ''}">${d}</button>`,
-      );
-    }
-
     return `
       <div class="cal" data-cal>
-        <p class="cal__month">${now.toLocaleDateString([], { month: 'long', year: 'numeric' })}</p>
-        <div class="cal__dow"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
-        <div class="cal__grid" data-cal-grid>${cells.join('')}</div>
-        <div class="cal__slots" data-cal-slots>
-          <p class="cal__hint">Pick a weekday to see open slots.</p>
+        <div class="ws__frame-wrap cal__frame-wrap">
+          <iframe class="ws__frame" src="${CALENDLY_URL}?hide_event_type_details=1&hide_gdpr_banner=1"
+                  loading="lazy" title="Book a call on Calendly"></iframe>
         </div>
+        <p class="cal__fallback">
+          Not loading? <a href="${CALENDLY_URL}" target="_blank" rel="noopener">Open in Calendly ↗</a>
+        </p>
       </div>`;
-  },
-
-  mount(root) {
-    const grid = root.querySelector('[data-cal-grid]');
-    const panel = root.querySelector('[data-cal-slots]');
-    let day = null;
-
-    grid.addEventListener('click', (e) => {
-      const b = e.target.closest('[data-day]');
-      if (!b || b.disabled) return;
-
-      grid.querySelectorAll('[data-day]').forEach((x) => x.removeAttribute('aria-pressed'));
-      b.setAttribute('aria-pressed', 'true');
-      day = b.dataset.day;
-
-      panel.innerHTML = `
-        <p class="cal__heading">30 min intro call · ${day} ${new Date().toLocaleDateString([], { month: 'short' })}</p>
-        <div class="cal__times">
-          ${SLOTS.map((t) => `<button type="button" data-slot="${t}">${t}</button>`).join('')}
-        </div>
-        <p class="cal__tz">Times shown in IST</p>`;
-    });
-
-    panel.addEventListener('click', (e) => {
-      const b = e.target.closest('[data-slot]');
-      if (!b) return;
-
-      panel.innerHTML = `
-        <div class="cal__confirm">
-          <span>${svg('<path d="M4 12.5l5.5 5.5L20 7"/>', 2.4)}</span>
-          <p>Booked — ${day} ${new Date().toLocaleDateString([], { month: 'short' })}, ${b.dataset.slot} IST</p>
-          <small>Prototype — wire this to Cal.com or Calendly.</small>
-        </div>`;
-    });
   },
 };
 
 /* ----------------------------------------------------------- settings --- */
 
-const currentTheme = () =>
-  document.querySelector('[data-screen]')?.getAttribute('data-theme') ?? 'dark';
+/* Both device frames' markup live in the same index.html regardless of
+   which shell is active (only the JS module differs), so a combined
+   selector would always match whichever one happens to come first in
+   document order — not necessarily the live one. Has to check which shell
+   actually booted. */
+const currentTheme = () => {
+  const isDesktop = document.documentElement.classList.contains('os-desktop');
+  const el = document.querySelector(isDesktop ? '[data-desktop]' : '[data-screen]');
+  return el?.getAttribute('data-theme') ?? 'dark';
+};
+
+const stRow = (k, v) => `<li><span>${k}</span><em>${v}</em></li>`;
+const stToggle = (id, k, on) => `
+  <li>
+    <span>${k}</span>
+    <button class="st__switch" type="button" role="switch" data-toggle="${id}"
+            aria-checked="${on}" aria-label="${k}"><i></i></button>
+  </li>`;
+
+/** Same four groups either way — desktop just puts them behind a sidebar
+    (macOS System Settings' own grammar) instead of one long scroll. The
+    Display group's toggle set differs slightly: wallpaper grain is a
+    phone-only wallpaper effect, so desktop only offers the two toggles it
+    can actually back (appearance, motion). */
+const SETTINGS_SECTIONS = () => {
+  const isDesktop = document.documentElement.classList.contains('os-desktop');
+  return [
+    {
+      id: 'agency',
+      label: 'Agency',
+      rowsHtml: [
+        stRow('Status', '<b class="st__ok">Taking work</b>'),
+        stRow('Response time', 'Under 24h'),
+        stRow('Markets', 'India · United States'),
+        stRow('Since', '2019'),
+      ].join(''),
+    },
+    {
+      id: 'engagement',
+      label: 'Engagement',
+      rowsHtml: [
+        stRow('Model', 'Retainer or project'),
+        stRow('Minimum', '3 months'),
+        stRow('Media managed', '₹5Cr+'),
+        stRow('Peak ROAS', '1700%'),
+      ].join(''),
+    },
+    {
+      id: 'display',
+      label: 'Display',
+      rowsHtml: [
+        stToggle('appearance', 'Light appearance', currentTheme() === 'light'),
+        stToggle('motion', 'Reduce motion', false),
+        ...(isDesktop ? [] : [stToggle('grain', 'Wallpaper grain', true)]),
+      ].join(''),
+      note: 'These actually work — try them, then go back to the home screen.',
+    },
+    {
+      id: 'about',
+      label: 'About',
+      rowsHtml: [stRow('System', 'Beard Bros OS 1.0'), stRow('Built with', 'Vite · GSAP Flip')].join(''),
+    },
+  ];
+};
+
+const settingsGroup = (s) => `
+  <p class="st__group">${esc(s.label)}</p>
+  <ul class="st__list">${s.rowsHtml}</ul>
+  ${s.note ? `<p class="st__note">${esc(s.note)}</p>` : ''}`;
 
 const settings = {
   label: 'Settings',
@@ -519,49 +966,46 @@ const settings = {
   title: 'Settings',
 
   render() {
-    const row = (k, v) => `<li><span>${k}</span><em>${v}</em></li>`;
-    const toggle = (id, k, on) => `
-      <li>
-        <span>${k}</span>
-        <button class="st__switch" type="button" role="switch" data-toggle="${id}"
-                aria-checked="${on}" aria-label="${k}"><i></i></button>
-      </li>`;
+    const sections = SETTINGS_SECTIONS();
 
-    return `
-      <div class="st" data-st>
-        <p class="st__group">Agency</p>
-        <ul class="st__list">
-          ${row('Status', '<b class="st__ok">Taking work</b>')}
-          ${row('Response time', 'Under 24h')}
-          ${row('Markets', 'India · United States')}
-          ${row('Since', '2019')}
-        </ul>
+    if (document.documentElement.classList.contains('os-desktop')) {
+      return `
+        <div class="st2" data-st>
+          <aside class="st2__sidebar">
+            <ul class="st2__nav">
+              ${sections
+                .map(
+                  (s, i) => `
+                <li>
+                  <button type="button" data-st-section="${s.id}" ${i === 0 ? "aria-current='true'" : ''}>
+                    ${esc(s.label)}
+                  </button>
+                </li>`,
+                )
+                .join('')}
+            </ul>
+          </aside>
+          <div class="st2__detail" data-st-detail>${settingsGroup(sections[0])}</div>
+        </div>`;
+    }
 
-        <p class="st__group">Engagement</p>
-        <ul class="st__list">
-          ${row('Model', 'Retainer or project')}
-          ${row('Minimum', '3 months')}
-          ${row('Media managed', '₹5Cr+')}
-          ${row('Peak ROAS', '1700%')}
-        </ul>
-
-        <p class="st__group">Display</p>
-        <ul class="st__list">
-          ${toggle('appearance', 'Light appearance', currentTheme() === 'light')}
-          ${toggle('motion', 'Reduce motion', false)}
-          ${toggle('grain', 'Wallpaper grain', true)}
-        </ul>
-        <p class="st__note">These three actually work — try them, then go back to the home screen.</p>
-
-        <p class="st__group">About</p>
-        <ul class="st__list">
-          ${row('System', 'Beard Bros OS 1.0')}
-          ${row('Built with', 'Vite · GSAP Flip')}
-        </ul>
-      </div>`;
+    return `<div class="st" data-st>${sections.map(settingsGroup).join('')}</div>`;
   },
 
   mount(root) {
+    const sections = SETTINGS_SECTIONS();
+    const detail = root.querySelector('[data-st-detail]');
+
+    if (detail) {
+      root.querySelector('.st2__sidebar').addEventListener('click', (e) => {
+        const b = e.target.closest('[data-st-section]');
+        if (!b) return;
+        root.querySelectorAll('.st2__sidebar [data-st-section]').forEach((x) => x.removeAttribute('aria-current'));
+        b.setAttribute('aria-current', 'true');
+        detail.innerHTML = settingsGroup(sections.find((s) => s.id === b.dataset.stSection));
+      });
+    }
+
     root.addEventListener('click', (e) => {
       const b = e.target.closest('[data-toggle]');
       if (!b) return;
@@ -575,148 +1019,104 @@ const settings = {
   },
 };
 
-/* ---------------------------------------------------------------- music -- */
+/* ---------------------------------------------------------------- radio -- */
 
-/** Real tracks — audio lives in /public/audio/music. */
-const TRACKS = [
-  { title: 'Coffee Shop', artist: 'Alex Morgan', src: '/audio/music/alex-morgan-chillhop-jazz-coffee-shop-552792.mp3' },
-  { title: 'Lofi Background', artist: 'Apalon Beats', src: '/audio/music/apalonbeats-lofi-background-music-560408.mp3' },
-  { title: 'Chill', artist: 'Jonas Blakewood', src: '/audio/music/jonasblakewood-chill-chill-music-519877.mp3' },
-  { title: 'Chill', artist: 'Mirostar', src: '/audio/music/mirostar-chill-chill-music-531503.mp3' },
-  { title: 'Lounge', artist: 'Prettyjohn', src: '/audio/music/prettyjohn1-lounge-music-494158.mp3' },
-];
+const PLAY_ICON = svg('<path d="M8 5l11 7-11 7z" fill="currentColor"/>', 0);
+const PAUSE_ICON = svg(
+  '<rect x="7" y="5" width="3.4" height="14" rx="1.2" fill="currentColor"/><rect x="13.6" y="5" width="3.4" height="14" rx="1.2" fill="currentColor"/>',
+  0,
+);
+const ICON_SKIP_NEXT = svg(
+  '<path d="M18 5v14" stroke-linecap="round"/><path d="M6 6.5v11l10-5.5z" fill="currentColor" stroke="none"/>',
+  1.8,
+);
 
-const mmss = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
+const ART_RADIO = art(`
+  ${field('g-rd', '#2c2c2e', '#1c1c1e')}
+  <path d="M30 42 L36 22 M70 42 L64 22" stroke="#d1d1d6" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+  <circle cx="36" cy="20" r="3.2" fill="#d1d1d6"/>
+  <circle cx="64" cy="20" r="3.2" fill="#d1d1d6"/>
+  <rect x="16" y="40" width="68" height="38" rx="7" fill="#fc3158"/>
+  <circle cx="34" cy="59" r="10" fill="#1c1c1e"/>
+  <circle cx="34" cy="59" r="4" fill="#fff" opacity=".85"/>
+  <rect x="52" y="51" width="24" height="4.5" rx="2.2" fill="#1c1c1e" opacity=".85"/>
+  <rect x="52" y="60" width="17" height="4.5" rx="2.2" fill="#1c1c1e" opacity=".85"/>
+`);
 
-/* Module-level, not inside mount() — playback survives the app closing.
-   Press play, browse elsewhere, it keeps going until paused. */
-const musicAudio = new Audio();
-let musicIdx = null;
+const ICON_VOLUME = svg(
+  '<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 9a4 4 0 010 6"/><path d="M19 6.5a8 8 0 010 11" opacity=".55"/>',
+  1.8,
+);
 
-const music = {
-  label: 'Music',
-  hue: '#f0436a',
-  art: ART_MUSIC,
-  title: 'Studio Loop',
+const radio = {
+  label: 'Radio',
+  hue: '#fc3158',
+  art: ART_RADIO,
+  title: 'On Air',
 
   render() {
     return `
-      <div class="mu" data-mu>
-        <div class="mu__album">
-          <span class="mu__cover" aria-hidden="true"><i></i><i></i><i></i></span>
-          <div>
-            <p class="mu__title">Studio Loop</p>
-            <p class="mu__sub">Lo-fi · ${TRACKS.length} tracks · What we build to</p>
-          </div>
+      <div class="rd" data-rd>
+        <span class="rd__art" data-rd-art aria-hidden="true">${ART_RADIO}</span>
+        <p class="rd__station" data-rd-station>Tuning in…</p>
+        <p class="rd__tags" data-rd-tags>Finding a station</p>
+        <div class="rd__transport">
+          <button type="button" class="rd__btn rd__btn--play" data-rd-play aria-label="Play">${PLAY_ICON}</button>
+          <button type="button" class="rd__btn" data-rd-next aria-label="Next station">${ICON_SKIP_NEXT}</button>
         </div>
-
-        <ol class="mu__list" data-mu-list>
-          ${TRACKS.map(
-            (t, i) => `
-            <li>
-              <button type="button" data-track="${i}">
-                <span class="mu__n">${i + 1}</span>
-                <span class="mu__meta"><b>${esc(t.title)}</b><em>${esc(t.artist)}</em></span>
-                <span class="mu__len" data-len="${i}">--:--</span>
-              </button>
-            </li>`,
-          ).join('')}
-        </ol>
-
-        <div class="mu__bar" data-mu-bar hidden>
-          <button class="mu__play" type="button" data-mu-play aria-label="Pause">
-            ${svg('<rect x="7" y="5" width="3.6" height="14" rx="1.2" fill="currentColor"/><rect x="13.4" y="5" width="3.6" height="14" rx="1.2" fill="currentColor"/>', 0)}
-          </button>
-          <div class="mu__now">
-            <p data-mu-now></p>
-            <div class="mu__track"><i data-mu-fill></i></div>
-          </div>
-          <span class="mu__time" data-mu-time>0:00</span>
+        <div class="rd__volume">
+          ${ICON_VOLUME}
+          <input type="range" min="0" max="100" value="80" data-rd-volume aria-label="Volume" />
         </div>
+        <p class="rd__note">Live internet radio — real independent rock stations, shuffled one to the next. A live broadcast can't be skipped mid-song the way a playlist can, so "next" tunes in somewhere new instead.</p>
       </div>`;
   },
 
   mount(root) {
-    const bar = root.querySelector('[data-mu-bar]');
-    const now = root.querySelector('[data-mu-now]');
-    const fill = root.querySelector('[data-mu-fill]');
-    const time = root.querySelector('[data-mu-time]');
-    const playBtn = root.querySelector('[data-mu-play]');
+    const artEl = root.querySelector('[data-rd-art]');
+    const stationEl = root.querySelector('[data-rd-station]');
+    const tagsEl = root.querySelector('[data-rd-tags]');
+    const playBtn = root.querySelector('[data-rd-play]');
+    const volume = root.querySelector('[data-rd-volume]');
 
-    // Probe each track just for its length, so the list shows real durations
-    // before anything is played.
-    const probes = TRACKS.map((t, i) => {
-      const p = new Audio();
-      p.preload = 'metadata';
-      p.addEventListener('loadedmetadata', () => {
-        root.querySelector(`[data-len="${i}"]`).textContent = mmss(p.duration);
+    const syncUI = () => {
+      const info = nowPlayingStation();
+      if (!info) {
+        stationEl.textContent = 'Tuning in…';
+        tagsEl.textContent = 'Finding a station';
+        return;
+      }
+      stationEl.textContent = info.name;
+      tagsEl.textContent = info.tags || 'Rock';
+      playBtn.innerHTML = info.paused ? PLAY_ICON : PAUSE_ICON;
+      playBtn.setAttribute('aria-label', info.paused ? 'Play' : 'Pause');
+      loadStationArt(info.favicon).then((img) => {
+        if (img) {
+          artEl.innerHTML = '';
+          artEl.appendChild(img);
+        } else {
+          artEl.innerHTML = ART_RADIO;
+        }
       });
-      p.src = t.src;
-      return p;
-    });
-
-    const paint = () => {
-      const d = musicAudio.duration || 0;
-      fill.style.width = d ? `${(musicAudio.currentTime / d) * 100}%` : '0%';
-      time.textContent = mmss(musicAudio.currentTime);
     };
 
-    const setPlaying = (on) => playBtn.setAttribute('aria-label', on ? 'Pause' : 'Play');
-
-    const pause = () => {
-      musicAudio.pause();
-      setPlaying(false);
-    };
-
-    const resume = () => {
-      musicAudio.play();
-      setPlaying(true);
-    };
-
-    function select(i) {
-      musicIdx = i;
-      const t = TRACKS[i];
-      musicAudio.src = t.src;
-      now.textContent = `${t.title} — ${t.artist}`;
-      bar.hidden = false;
-      root.querySelectorAll('[data-track]').forEach((b, n) =>
-        b.toggleAttribute('aria-current', n === i),
-      );
-      fill.style.width = '0%';
-      time.textContent = '0:00';
-      resume();
-    }
-
-    // Reopening the app while a track is already going — reflect it
+    // Reopening the app with a station already going — reflect it
     // immediately instead of coming up blank.
-    if (musicIdx !== null) {
-      const t = TRACKS[musicIdx];
-      now.textContent = `${t.title} — ${t.artist}`;
-      bar.hidden = false;
-      root.querySelectorAll('[data-track]').forEach((b, n) =>
-        b.toggleAttribute('aria-current', n === musicIdx),
-      );
-      setPlaying(!musicAudio.paused);
-      paint();
-    }
+    syncUI();
+    volume.value = String(Math.round(radioAudio.volume * 100));
 
-    root.querySelector('[data-mu-list]').addEventListener('click', (e) => {
-      const b = e.target.closest('[data-track]');
-      if (b) select(Number(b.dataset.track));
-    });
+    playBtn.addEventListener('click', () => radioToggle().then(syncUI));
+    root.querySelector('[data-rd-next]').addEventListener('click', () => radioNext().then(syncUI));
+    volume.addEventListener('input', () => setRadioVolume(volume.value / 100));
 
-    playBtn.addEventListener('click', () => (musicAudio.paused ? resume() : pause()));
-
-    const onEnded = () => select((musicIdx + 1) % TRACKS.length);
-    musicAudio.addEventListener('timeupdate', paint);
-    musicAudio.addEventListener('ended', onEnded);
+    radioAudio.addEventListener('play', syncUI);
+    radioAudio.addEventListener('pause', syncUI);
+    radioAudio.addEventListener('loadedmetadata', syncUI);
 
     return () => {
-      musicAudio.removeEventListener('timeupdate', paint);
-      musicAudio.removeEventListener('ended', onEnded);
-      probes.forEach((p) => {
-        p.src = '';
-      });
+      radioAudio.removeEventListener('play', syncUI);
+      radioAudio.removeEventListener('pause', syncUI);
+      radioAudio.removeEventListener('loadedmetadata', syncUI);
     };
   },
 };
@@ -1028,131 +1428,35 @@ const fileDetail = (f) => `
       .join('')}
   </article>`;
 
-/* ---------------------------------------------------------------- memos -- */
-
-/** Real client recordings — audio lives in /public/audio/memos. */
-const MEMOS = [
-  { id: 'beardo', author: 'Ashutosh Valani', role: 'Co-founder, Beardo', src: '/audio/memos/ashutosh-valani-beardo.mp3' },
-  {
-    id: 'naturevibe',
-    author: 'Rishabh Chokhani',
-    role: 'Founder, Naturevibe Botanicals',
-    src: '/audio/memos/rishabh-chokhani-naturevibe-botanicals.mp3',
-  },
-  {
-    id: 'celfiedesign',
-    author: 'Rahul Satia',
-    role: 'Founder, CelfieDesign',
-    src: '/audio/memos/rahul-satia-celfie-design.mp3',
-  },
-  { id: 'nutrizoe', author: 'Richa Pendeke', role: 'Nutrizoe', src: '/audio/memos/richa-pendeke-nutrizoe.mp3' },
-  { id: 'prodigitaly', author: 'Subhasis Rath', role: 'Prodigitaly', src: '/audio/memos/subhasis-rath-prodigitaly.mp3' },
-];
-
-const PLAY_ICON = svg('<path d="M8 5l11 7-11 7z" fill="currentColor"/>', 0);
-const PAUSE_ICON = svg(
-  '<rect x="7" y="5" width="3.4" height="14" rx="1.2" fill="currentColor"/><rect x="13.6" y="5" width="3.4" height="14" rx="1.2" fill="currentColor"/>',
-  0,
-);
-
-const memos = {
-  label: 'Voice Memos',
-  hue: '#f0436a',
-  art: ART_MEMOS,
-  title: 'Client Voices',
-
-  render() {
-    return `
-      <div class="vm" data-vm>
-        <p class="vm__note">Client testimonials, recorded in their own voice.</p>
-        <ul class="vm__list">
-          ${MEMOS.map(
-            (m, i) => `
-            <li data-memo="${m.id}">
-              <button type="button" class="vm__row" data-play="${i}">
-                <span class="vm__pp" aria-hidden="true" data-pp>${PLAY_ICON}</span>
-                <span class="vm__meta">
-                  <b>${esc(m.author)}</b>
-                  <em>${esc(m.role)}</em>
-                </span>
-                <span class="vm__badge" data-time>--:--</span>
-              </button>
-              <div class="vm__wave" data-wave>
-                ${Array.from({ length: 34 }, (_, k) => `<i style="--h:${20 + ((k * 37) % 62)}%"></i>`).join('')}
-              </div>
-            </li>`,
-          ).join('')}
-        </ul>
-      </div>`;
-  },
-
-  mount(root) {
-    const audio = new Audio();
-    audio.preload = 'none';
-
-    const rows = [...root.querySelectorAll('[data-memo]')];
-    let active = null;
-
-    const mmssLocal = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
-
-    const paintTime = () => {
-      if (active === null) return;
-      const li = rows[active];
-      const t = li.querySelector('[data-time]');
-      t.textContent = mmssLocal(audio.currentTime);
-    };
-
-    const setPlaying = (i, on) => {
-      const li = rows[i];
-      li.toggleAttribute('data-speaking', on);
-      li.querySelector('[data-pp]').innerHTML = on ? PAUSE_ICON : PLAY_ICON;
-    };
-
-    const stop = () => {
-      if (active === null) return;
-      audio.pause();
-      setPlaying(active, false);
-      rows[active].querySelector('[data-time]').textContent = '--:--';
-      active = null;
-    };
-
-    root.addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-play]');
-      if (!btn) return;
-      const i = Number(btn.dataset.play);
-
-      if (active === i) {
-        stop();
-        return;
-      }
-
-      if (active !== null) setPlaying(active, false);
-      active = i;
-      audio.src = MEMOS[i].src;
-      audio.currentTime = 0;
-      audio.play().catch(() => stop());
-      setPlaying(i, true);
-    });
-
-    audio.addEventListener('timeupdate', paintTime);
-    audio.addEventListener('ended', stop);
-
-    return () => {
-      audio.pause();
-      audio.src = '';
-    };
-  },
-};
-
 /* ---------------------------------------------------------------- feed -- */
 
 /**
- * Every shipped project becomes a grid post; the twelve with an extended
- * write-up double as both the stories rail and the profile's highlight reel —
- * the same signal Safari already uses to decide which projects get a full
- * page.
+ * Instagram stays a curated, on-brand feed rather than a mirror of the full
+ * portfolio — everything else lives in Safari instead. This is the explicit
+ * allowlist of projects that appear in the Instagram app (grid, stories rail,
+ * profile highlights); every other project is still fully browsable from
+ * Safari's Suggestions grid.
  */
-const HIGHLIGHTS = projectsData.filter((p) => p.body);
+const INSTAGRAM_SLUGS = [
+  'mama-nourish',
+  'total-snacc',
+  'the-gaming-truck',
+  'hip-hop-skincare',
+  'chenab-gourmet',
+  'sutlej-textiles-and-industries-limited',
+  'nesterra-home-decor',
+  'big-bazaar-food',
+  'beardo',
+  'society-tea',
+  'prolicious',
+  'volkano',
+  'nutrizoe',
+  'f5-smart-tech',
+  'naturevibe-india',
+  'sozo-izakaya',
+];
+const INSTAGRAM_PROJECTS = INSTAGRAM_SLUGS.map((slug) => projectsData.find((p) => p.slug === slug)).filter(Boolean);
+const HIGHLIGHTS = INSTAGRAM_PROJECTS;
 
 /** Deterministic per-slug pseudo-stats, so numbers don't reshuffle on repaint. */
 const hashSeed = (slug, salt) => {
@@ -1181,11 +1485,41 @@ const ICON_SHARE = svg('<path d="M22 3L2.5 10.4c-.9.3-.9 1.6.1 1.8L11 14l1.8 8.4
 const ICON_BOOKMARK = svg('<path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4-6.5 4V4.5a1 1 0 0 1 1-1z"/>', 1.8);
 const ICON_MENU = svg('<circle cx="5" cy="12" r="1.7" fill="currentColor"/><circle cx="12" cy="12" r="1.7" fill="currentColor"/><circle cx="19" cy="12" r="1.7" fill="currentColor"/>', 0);
 const ICON_CAMERA_ADD = svg('<rect x="3" y="3" width="18" height="18" rx="5.5"/><path d="M12 8v8M8 12h8"/>', 1.8);
+const SPEAKER = '<path d="M4 9v6h4l5 4V5L8 9z"/>';
+const ICON_SPEAKER_MUTED = svg(`${SPEAKER}<path d="M16 9l5 6M21 9l-5 6"/>`, 1.8);
+const ICON_SPEAKER_ON = svg(`${SPEAKER}<path d="M16.5 9a4 4 0 010 6"/><path d="M19 6.5a8 8 0 010 11" opacity=".55"/>`, 1.8);
 
 const feedTile = (p) => `
   <button type="button" class="ig__tile" data-post="${p.slug}" aria-label="${esc(p.client)}">
     <img src="${p.images[0]}" alt="" loading="lazy" decoding="async" />
   </button>`;
+
+/*
+ * Real Instagram posts, embedded via Instagram's own widget rather than
+ * self-hosted video — the script is loaded once and told to re-scan
+ * whenever fresh blockquotes land in the DOM (it only auto-scans on its
+ * own initial load).
+ */
+let igEmbedScript = null;
+const loadIgEmbedScript = () => {
+  if (window.instgrm) return Promise.resolve();
+  if (igEmbedScript) return igEmbedScript;
+  igEmbedScript = new Promise((resolve) => {
+    const s = document.createElement('script');
+    s.src = 'https://www.instagram.com/embed.js';
+    s.async = true;
+    s.onload = resolve;
+    document.body.appendChild(s);
+  });
+  return igEmbedScript;
+};
+
+const processIgEmbeds = () => {
+  loadIgEmbedScript().then(() => window.instgrm?.Embeds?.process());
+};
+
+const embedBlock = (r) => `
+  <blockquote class="instagram-media" data-instgrm-permalink="${esc(r.url)}" data-instgrm-version="14"></blockquote>`;
 
 const storyBubble = (p) => `
   <button type="button" class="ig__story" data-post="${p.slug}">
@@ -1193,22 +1527,18 @@ const storyBubble = (p) => `
     <span class="ig__story-label">${esc(p.client)}</span>
   </button>`;
 
-const feedGrid = () => `
-  <div class="ig__stories" role="list">${HIGHLIGHTS.map(storyBubble).join('')}</div>
-  <div class="ig__grid" role="list">${projectsData.map(feedTile).join('')}</div>`;
-
-const backRow = (to) => `
+const backRow = (to, label) => `
   <button class="nt__back" type="button" data-ig-back="${to}">
-    ${svg('<path d="M15 5l-7 7 7 7"/>', 2)} ${to === 'profile' ? 'Profile' : 'Feed'}
+    ${svg('<path d="M15 5l-7 7 7 7"/>', 2)} ${label}
   </button>`;
 
 const profileView = () => `
-  ${backRow('grid')}
+  ${backRow('grid', 'Feed')}
   <div class="ig__profile">
     <div class="ig__profile-head">
       <span class="ig__avatar ig__avatar--lg">BB</span>
       <dl class="ig__stats">
-        <div><dt>${projectsData.length}</dt><dd>Posts</dd></div>
+        <div><dt>${INSTAGRAM_PROJECTS.length}</dt><dd>Posts</dd></div>
         <div><dt>100+</dt><dd>Clients</dd></div>
         <div><dt>2015</dt><dd>Since</dd></div>
       </dl>
@@ -1219,8 +1549,121 @@ const profileView = () => `
     <div class="ig__grid" role="list">${HIGHLIGHTS.map(feedTile).join('')}</div>
   </div>`;
 
-const postView = (p, back) => `
-  ${backRow(back)}
+/*
+ * Instagram's oEmbed widget can't be restyled — it's an iframe with its own
+ * fixed chrome. Where the actual creative has been saved locally (see
+ * portfolio-media.js), that renders as plain tiles instead: same grid the
+ * rest of the app already uses, no Instagram-branded card breaking the
+ * illusion. The live embed is only a fallback for projects with a real
+ * permalink but no local copy yet.
+ */
+const nativeTile = (kind, src) =>
+  kind === 'video'
+    ? `<div class="ig__native-tile"><video src="${esc(src)}" controls preload="metadata" playsinline></video></div>`
+    : `<div class="ig__native-tile"><img src="${esc(src)}" alt="" loading="lazy" decoding="async" /></div>`;
+
+const projectReels = (slug) => {
+  const media = mediaByProject[slug];
+  if (media && (media.images.length || media.videos.length)) {
+    return `
+      <p class="ig__highlights-label">From the shoot</p>
+      <div class="ig__native-grid" role="list">
+        ${media.images.map((s) => nativeTile('image', s)).join('')}
+        ${media.videos.map((s) => nativeTile('video', s)).join('')}
+      </div>`;
+  }
+
+  const clips = reelsByProject[slug];
+  if (clips?.length) {
+    return `
+      <p class="ig__highlights-label">On Instagram</p>
+      <div class="ig__embeds" data-ig-embeds>${clips.map(embedBlock).join('')}</div>`;
+  }
+
+  return '';
+};
+
+/*
+ * Tapping a highlight bubble opens *that project's* own shoot as a vertical
+ * stream — sized to whatever the media's own aspect ratio is (no forced
+ * square crop the way a grid tile gets one), video included, the way
+ * Instagram's own home timeline scrolls. The default feed underneath stays
+ * the familiar grid; this is scoped, not global.
+ */
+const projectPosts = (p) => {
+  const media = mediaByProject[p.slug];
+  if (!media) return [];
+  return [
+    ...media.images.map((src, i) => ({ p, kind: 'image', src, key: `${p.slug}-img${i}` })),
+    ...media.videos.map((src, i) => ({ p, kind: 'video', src, key: `${p.slug}-vid${i}` })),
+  ];
+};
+
+const hFeedMedia = (kind, src) =>
+  kind === 'video'
+    ? `<div class="ig__post-media ig__post-media--natural">
+         <video class="ig__hpost-vid" data-autoplay data-ig-dbl src="${esc(src)}" muted loop playsinline preload="metadata"></video>
+         <button type="button" class="ig__hpost-mute" data-hpost-mute aria-pressed="true" aria-label="Unmute">${ICON_SPEAKER_MUTED}</button>
+         <span class="ig__heart-burst" data-ig-burst aria-hidden="true">${ICON_HEART}</span>
+       </div>`
+    : `<div class="ig__post-media ig__post-media--natural">
+         <img class="ig__hpost-img" data-ig-dbl src="${esc(src)}" alt="" loading="lazy" decoding="async" />
+         <span class="ig__heart-burst" data-ig-burst aria-hidden="true">${ICON_HEART}</span>
+       </div>`;
+
+const homePostCard = ({ p, kind, src, key }) => `
+  <article class="ig__post" data-hpost="${p.slug}">
+    <div class="ig__post-topbar">
+      <button type="button" class="ig__post-head" data-ig-avatar>
+        <span class="ig__avatar">BB</span>
+        <span class="ig__post-meta"><b>beardbros</b><em>${esc(p.discipline)}</em></span>
+      </button>
+      <span class="ig__post-menu" aria-hidden="true">${ICON_MENU}</span>
+    </div>
+    ${hFeedMedia(kind, src)}
+    <div class="ig__actions">
+      <button type="button" class="ig__like" data-ig-like="${key}" aria-pressed="false" aria-label="Like">
+        ${ICON_HEART_OUTLINE}
+      </button>
+      <span class="ig__action-icon" aria-hidden="true">${ICON_COMMENT}</span>
+      <span class="ig__action-icon" aria-hidden="true">${ICON_SHARE}</span>
+      <span class="ig__action-icon ig__action-icon--end" aria-hidden="true">${ICON_BOOKMARK}</span>
+    </div>
+    <p class="ig__likes">Liked by <b>beardbros</b> and <span data-ig-count>${hashLikes(key)}</span> others</p>
+    <button type="button" class="ig__comments-link" data-hpost-open="${p.slug}">View all ${hashComments(key)} comments</button>
+    <p class="ig__timestamp">${hashAgo(key)}</p>
+  </article>`;
+
+const projectFeedView = (p) => `
+  ${backRow('grid', 'Feed')}
+  <p class="ig__highlights-label">${esc(p.client)}</p>
+  <div class="ig__home" data-ig-home>${projectPosts(p).map(homePostCard).join('')}</div>`;
+
+/*
+ * The default view — every project's own upload(s), one full post below the
+ * other, the way a real Instagram home feed scrolls rather than a grid of
+ * thumbnails. A project with local media (portfolio-media.js) unrolls into
+ * one post per asset, video included; everything else falls back to its
+ * single hero image.
+ */
+const buildFeedPosts = () => {
+  const posts = [];
+  INSTAGRAM_PROJECTS.forEach((p) => {
+    const media = mediaByProject[p.slug];
+    if (media && (media.images.length || media.videos.length)) posts.push(...projectPosts(p));
+    else posts.push({ p, kind: 'image', src: p.images[0], key: `${p.slug}-hero` });
+  });
+  return posts;
+};
+
+const FEED_POSTS = buildFeedPosts();
+
+const homeFeed = () => `
+  <div class="ig__stories" role="list">${HIGHLIGHTS.map(storyBubble).join('')}</div>
+  <div class="ig__home" data-ig-home>${FEED_POSTS.map(homePostCard).join('')}</div>`;
+
+const postView = (p, to, label) => `
+  ${backRow(to, label)}
   <article class="ig__post">
     <div class="ig__post-topbar">
       <button type="button" class="ig__post-head" data-ig-avatar>
@@ -1242,11 +1685,11 @@ const postView = (p, back) => `
       <span class="ig__action-icon ig__action-icon--end" aria-hidden="true">${ICON_BOOKMARK}</span>
     </div>
     <p class="ig__likes">Liked by <b>beardbros</b> and <span data-ig-count>${hashLikes(p.slug)}</span> others</p>
-    <p class="ig__caption"><b>beardbros</b> ${esc(p.summary)}</p>
     ${p.body ? p.body.map((t) => `<p class="app__p">${esc(t)}</p>`).join('') : ''}
     <p class="ig__comments-link">View all ${hashComments(p.slug)} comments</p>
     <p class="ig__timestamp">${hashAgo(p.slug)}</p>
     <p class="pj__src"><a href="${p.source}" target="_blank" rel="noopener">View on beardbros.in</a></p>
+    ${projectReels(p.slug)}
   </article>`;
 
 const feed = {
@@ -1265,23 +1708,64 @@ const feed = {
             <button type="button" class="ig__bar-avatar" data-ig-avatar aria-label="Profile">BB</button>
           </div>
         </div>
-        <div data-ig-view>${feedGrid()}</div>
+        <div data-ig-view>${homeFeed()}</div>
       </div>`;
   },
 
   mount(root) {
     const view = root.querySelector('[data-ig-view]');
     const liked = new Set();
+    /* Where "back" goes: 'grid' (default), 'profile', or 'project' (a
+       highlight's own scoped feed, tracked via originSlug since more than
+       one project can be the "current" one across a session). */
     let origin = 'grid';
+    let originSlug = null;
+
+    /* Videos only autoplay once scrolled into view — same idea as a real
+       feed, and it means a hundred-odd posts don't all fight for decode
+       bandwidth at once. The same observer also lazily grabs every video's
+       poster frame the first time it scrolls into view (rather than all at
+       once on paint — the unrolled home feed alone can hold 60-odd clips)
+       and, for the "from the shoot" grid videos a viewer pressed play on
+       manually, pauses them once they scroll back out. Rebuilt after every
+       repaint since paint() replaces the DOM the previous observer was
+       watching.
+       Threshold is fraction of the *video's own* area, not the viewport's —
+       a portrait clip taller than the window can never clear something like
+       0.6, so this stays low enough that "mostly on screen" is enough to
+       start it, the same bar a real feed uses. */
+    let io = null;
+    const wireAutoplay = () => {
+      io?.disconnect();
+      const vids = [...view.querySelectorAll('video')];
+      if (!vids.length) return;
+      io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((en) => {
+            const v = en.target;
+            const auto = v.dataset.autoplay !== undefined;
+            if (en.isIntersecting) {
+              capturePoster(v);
+              if (auto) v.play().catch(() => {});
+            } else if (auto || !v.paused) {
+              v.pause();
+            }
+          });
+        },
+        { root, threshold: 0.2 },
+      );
+      vids.forEach((v) => io.observe(v));
+    };
 
     const paint = (html) => {
       view.innerHTML = html;
       root.scrollTop = 0;
+      wireAutoplay();
     };
 
-    const showGrid = () => {
+    const showHome = () => {
       origin = 'grid';
-      paint(feedGrid());
+      paint(homeFeed());
     };
 
     const showProfile = () => {
@@ -1289,21 +1773,54 @@ const feed = {
       paint(profileView());
     };
 
+    const showProjectFeed = (slug) => {
+      const p = projectsData.find((x) => x.slug === slug);
+      if (!p) return;
+      origin = 'project';
+      originSlug = slug;
+      paint(projectFeedView(p));
+    };
+
+    const backTarget = () => {
+      if (origin === 'profile') return ['profile', 'Profile'];
+      if (origin === 'project') {
+        const proj = projectsData.find((x) => x.slug === originSlug);
+        return [`project:${originSlug}`, proj ? proj.client : 'Feed'];
+      }
+      return ['grid', 'Feed'];
+    };
+
     const showPost = (slug) => {
       const p = projectsData.find((x) => x.slug === slug);
-      if (p) paint(postView(p, origin));
+      if (!p) return;
+      const [to, label] = backTarget();
+      paint(postView(p, to, label));
+      const media = mediaByProject[slug];
+      const usedLocalMedia = media && (media.images.length || media.videos.length);
+      if (!usedLocalMedia && reelsByProject[slug]?.length) processIgEmbeds();
     };
 
     const setLiked = (likeBtn, on) => {
-      const slug = likeBtn.dataset.igLike;
-      liked[on ? 'add' : 'delete'](slug);
+      const key = likeBtn.dataset.igLike;
+      liked[on ? 'add' : 'delete'](key);
       likeBtn.setAttribute('aria-pressed', String(on));
       likeBtn.innerHTML = on ? ICON_HEART : ICON_HEART_OUTLINE;
       likeBtn.closest('.ig__post').querySelector('[data-ig-count]').textContent =
-        String(hashLikes(slug) + (on ? 1 : 0));
+        String(hashLikes(key) + (on ? 1 : 0));
     };
 
     root.addEventListener('click', (e) => {
+      const mute = e.target.closest('[data-hpost-mute]');
+      if (mute) {
+        const vid = mute.closest('.ig__post-media')?.querySelector('video');
+        if (vid) {
+          vid.muted = !vid.muted;
+          mute.setAttribute('aria-pressed', String(vid.muted));
+          mute.innerHTML = vid.muted ? ICON_SPEAKER_MUTED : ICON_SPEAKER_ON;
+        }
+        return;
+      }
+
       const like = e.target.closest('[data-ig-like]');
       if (like) {
         setLiked(like, !liked.has(like.dataset.igLike));
@@ -1315,6 +1832,26 @@ const feed = {
         return;
       }
 
+      const open = e.target.closest('[data-hpost-open]');
+      if (open) {
+        showPost(open.dataset.hpostOpen);
+        return;
+      }
+
+      /* A highlight bubble opens that project's own shoot as a scoped
+         feed when there's local media for it; otherwise it's the same
+         case-study post any other tile opens. Checked before the generic
+         [data-post] tile handler below, since a story bubble matches that
+         selector too. */
+      const story = e.target.closest('.ig__story');
+      if (story) {
+        const slug = story.dataset.post;
+        const media = mediaByProject[slug];
+        if (media && (media.images.length || media.videos.length)) showProjectFeed(slug);
+        else showPost(slug);
+        return;
+      }
+
       const tile = e.target.closest('[data-post]');
       if (tile) {
         showPost(tile.dataset.post);
@@ -1323,7 +1860,10 @@ const feed = {
 
       const back = e.target.closest('[data-ig-back]');
       if (back) {
-        back.dataset.igBack === 'profile' ? showProfile() : showGrid();
+        const to = back.dataset.igBack;
+        if (to === 'profile') showProfile();
+        else if (to.startsWith('project:')) showProjectFeed(to.slice('project:'.length));
+        else showHome();
       }
     });
 
@@ -1339,10 +1879,19 @@ const feed = {
       void burst.offsetWidth;
       burst.classList.add('is-active');
     });
+
+    /* render() already painted the initial home feed's markup directly, so
+       without this the observer set up above only ever gets attached by a
+       later paint() call — meaning nothing in the feed loads a poster frame
+       or autoplays until the user navigates away and back once. */
+    wireAutoplay();
+
+    return () => io?.disconnect();
   },
 };
 
-export const APPS = { safari, notes, files, journal: journalApp, mail, memos, calendar, music, clock, weather, settings, feed };
-export const SYSTEM_ORDER = ['safari', 'notes', 'feed', 'files', 'journal', 'mail', 'memos', 'calendar', 'music', 'clock', 'weather', 'settings'];
+export const APPS = { safari, notes, files, journal: journalApp, mail, calendar, radio, clock, weather, settings, feed };
+export const SYSTEM_ORDER = ['safari', 'notes', 'feed', 'files', 'journal', 'mail', 'calendar', 'radio', 'clock', 'weather', 'settings'];
 export const DOCK_ORDER = ['safari', 'mail', 'settings'];
-export { svg, art, field, esc };
+export { svg, art, field, esc, ART_RADIO, PLAY_ICON, PAUSE_ICON, ICON_SKIP_NEXT };
+export { radioAudio, radioToggle, radioNext, setRadioVolume, nowPlayingStation, loadStationArt } from './radio.js';

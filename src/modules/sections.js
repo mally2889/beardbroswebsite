@@ -279,10 +279,11 @@ export function setFooterYear() {
 
 /* ---------- contact form ---------- */
 // FormSubmit delivers enquiries to this address — no account needed. The first
-// submission triggers a one-time activation email; after activating you can
-// swap in the random-alias endpoint FormSubmit gives you to keep the address
-// out of the bundle.
-const FORM_ENDPOINT = 'https://formsubmit.co/ajax/malcolmpinto2000@gmail.com';
+// submission triggers a one-time activation email to mally@beardbros.in;
+// activate it there or every submission before that point will fail silently.
+// After activating you can swap in the random-alias endpoint FormSubmit gives
+// you to keep the address out of the bundle.
+const FORM_ENDPOINT = 'https://formsubmit.co/ajax/mally@beardbros.in';
 
 export function initContactForm() {
   const form = document.querySelector('[data-contact-form]');

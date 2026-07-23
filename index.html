@@ -3,6 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <title>Beard Bros — Creative &amp; Digital Marketing Agency in Mumbai | D2C Growth Partner</title>
     <meta
       name="description"
@@ -112,6 +115,8 @@
             </span>
           </div>
 
+          <button type="button" class="springboard__done" data-springboard-done hidden>Done</button>
+
           <!-- Paged springboard: services, then work. -->
           <div class="springboard" data-springboard>
             <div class="pages" data-pages>
@@ -177,6 +182,12 @@
               </div>
             </div>
           </div>
+
+          <div class="phone-sleep" data-phone-sleep aria-hidden="true">
+            <p class="phone-sleep__time" data-phone-sleep-time>--:--</p>
+            <p class="phone-sleep__date" data-phone-sleep-date>—</p>
+            <p class="phone-sleep__hint">Tap to wake</p>
+          </div>
         </div>
       </div>
     </div>
@@ -184,23 +195,60 @@
     <div class="dt-desktop" data-desktop>
       <div class="dt-wallpaper" aria-hidden="true"></div>
 
+      <div class="dt-boot" data-dt-boot aria-hidden="true">
+        <span class="dt-boot__mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48"><circle cx="18" cy="24" r="13"/><circle cx="30" cy="24" r="13"/></svg>
+        </span>
+        <p class="dt-boot__word">Beard Bros</p>
+        <div class="dt-boot__bar"><span data-dt-boot-fill></span></div>
+      </div>
+
       <div class="dt-menubar">
-        <span class="dt-menubar__brand">Beard Bros</span>
-        <span class="dt-menubar__menu">File</span>
-        <span class="dt-menubar__menu">Edit</span>
-        <span class="dt-menubar__menu">View</span>
-        <span class="dt-menubar__menu">Window</span>
+        <div class="dt-menubar__menus" data-dt-menus></div>
         <span class="dt-menubar__spacer"></span>
         <span class="dt-menubar__status">
           <span class="dt-menubar__dot" aria-hidden="true"></span>
           Available
         </span>
+        <div class="dt-menubar__icons" data-dt-icons></div>
+        <span class="dt-menubar__date" data-dt-date>--- --</span>
         <span class="dt-menubar__time" data-dt-clock>--:--</span>
       </div>
+
+      <div class="dt-cc" data-dt-cc aria-hidden="true">
+        <div class="dt-cc__sheet" data-dt-cc-sheet>
+          <div class="dt-cc__toggles" data-dt-cc-toggles></div>
+          <div class="dt-cc__widgets-picker" data-dt-cc-widgets-picker hidden></div>
+          <div class="dt-cc__radio" data-dt-cc-radio></div>
+          <div class="dt-cc__slider">
+            <div class="dt-cc__slider-head">
+              <span>Brightness</span>
+              <span class="dt-cc__slider-val" data-dt-cc-bright-val>100%</span>
+            </div>
+            <input type="range" class="dt-cc__range" data-dt-cc-brightness min="45" max="100" value="100" step="1" aria-label="Screen brightness" />
+          </div>
+        </div>
+      </div>
+
+      <div class="dt-widgets" data-dt-widgets></div>
+      <div class="dt-icons-rail" data-dt-icons-rail></div>
 
       <div class="dt-windows" data-dt-windows></div>
 
       <div class="dt-dock" data-dt-dock role="list"></div>
+
+      <div class="dt-sleep" data-dt-sleep aria-hidden="true">
+        <p class="dt-sleep__time" data-dt-sleep-time>--:--</p>
+        <p class="dt-sleep__date" data-dt-sleep-date>—</p>
+        <p class="dt-sleep__hint">Click anywhere to wake</p>
+      </div>
+
+      <div class="dt-loggedout" data-dt-loggedout aria-hidden="true">
+        <p class="dt-loggedout__mark" aria-hidden="true">BB</p>
+        <p class="dt-loggedout__title">Signed out</p>
+        <p class="dt-loggedout__hint">You're viewing Beard Bros OS as a guest.</p>
+        <button type="button" class="dt-loggedout__btn" data-dt-login>Log back in</button>
+      </div>
     </div>
 
     <script type="module" src="/src/os-entry.js"></script>

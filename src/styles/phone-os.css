@@ -407,6 +407,86 @@ body {
   outline-offset: 3px;
 }
 
+/* --------------------------------------------------- icon rearranging -- */
+
+/* Long-press an icon → the whole page jiggles, iOS-style, and any icon
+   (not just the one pressed) becomes draggable — including into an
+   adjacent page by hovering the drag near a screen edge. */
+.pages.is-icon-editing .app-icon {
+  animation: icon-jiggle 0.24s ease-in-out infinite alternate;
+}
+
+.pages.is-icon-editing .app-icon:nth-child(odd) {
+  animation-delay: 0.07s;
+}
+
+@keyframes icon-jiggle {
+  from {
+    transform: rotate(-1.4deg);
+  }
+  to {
+    transform: rotate(1.4deg);
+  }
+}
+
+.app-icon.is-dragging-icon {
+  opacity: 0.001;
+}
+
+.app-icon--ghost {
+  position: fixed;
+  z-index: 999;
+  margin: 0;
+  pointer-events: none;
+  animation: none !important;
+}
+
+.springboard__done {
+  position: absolute;
+  /* Squeezed into the gap between the status bar and the first widget
+     card — both are otherwise occupied (status bar's own right-aligned
+     text, the widget's rounded top edge), so this is deliberately small. */
+  top: 33px;
+  right: 16px;
+  z-index: 6;
+  padding: 0.12rem 0.55rem;
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.18);
+  border: 0;
+  border-radius: 999px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ------------------------------------------------- widget rearranging -- */
+
+.today.is-widget-editing .tw {
+  animation: icon-jiggle 0.24s ease-in-out infinite alternate;
+}
+
+.tw.is-dragging-widget {
+  opacity: 0.001;
+}
+
+.tw--ghost {
+  position: fixed;
+  z-index: 999;
+  margin: 0;
+  pointer-events: none;
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pages.is-icon-editing .app-icon,
+  .today.is-widget-editing .tw {
+    animation: none;
+  }
+}
+
 /* ------------------------------------------------------------- pagedots -- */
 
 .pagedots {
@@ -526,6 +606,51 @@ body {
 }
 
 /* --------------------------------------------------------- control center -- */
+
+.phone-sleep {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background: rgba(6, 5, 4, 0.72);
+  backdrop-filter: blur(40px) saturate(140%);
+  -webkit-backdrop-filter: blur(40px) saturate(140%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+.phone-sleep.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.phone-sleep__time {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 3.4rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.phone-sleep__date {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.phone-sleep__hint {
+  margin: 2rem 0 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.4);
+}
 
 .cc {
   position: absolute;
@@ -800,6 +925,7 @@ body {
      reserve room for it plus the iOS safe area. */
   padding: 1.15rem 1.3rem calc(3.6rem + env(safe-area-inset-bottom));
   overflow-y: auto;
+  overflow-x: hidden;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
@@ -1171,7 +1297,96 @@ body {
   color: rgba(255, 255, 255, 0.55);
 }
 
+.tw--radio {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.8rem 0.9rem;
+}
+
+.tw__radio-art {
+  display: block;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0 6px 14px -7px rgba(0, 0, 0, 0.7);
+}
+
+.tw__radio-art img,
+.tw__radio-art .icon-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.tw__radio-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.tw__radio-station {
+  margin: 0;
+  overflow: hidden;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tw__radio-tags {
+  margin: 0.1rem 0 0;
+  overflow: hidden;
+  font-size: 0.66rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tw__radio-controls {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.tw__radio-btn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.09);
+  border: 0;
+  border-radius: 50%;
+}
+
+.tw__radio-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.tw__radio-btn--play {
+  width: 38px;
+  height: 38px;
+  color: #fff;
+  background: #f0436a;
+}
+
+.tw__radio-btn--play svg {
+  width: 17px;
+  height: 17px;
+}
+
 [data-theme='light'] .tw__big {
+  color: #17130f;
+}
+
+[data-theme='light'] .tw__radio-station {
   color: #17130f;
 }
 

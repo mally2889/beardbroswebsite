@@ -1,0 +1,150 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "public/portfolio"
+public_folder: "/portfolio"
+
+collections:
+  - name: "projects"
+    label: "Portfolio Projects"
+    files:
+      - file: "src/data/projects-full.json"
+        label: "All Projects"
+        name: "projects"
+        fields:
+          - label: "Projects"
+            name: "projects"
+            widget: "list"
+            summary: "{{fields.client}} — {{fields.summary}}"
+            fields:
+              - { label: "Slug (used in URLs, no spaces)", name: "slug", widget: "string" }
+              - { label: "Client", name: "client", widget: "string" }
+              - { label: "Title", name: "title", widget: "string" }
+              - { label: "Discipline", name: "discipline", widget: "string" }
+              - { label: "One-line Summary", name: "summary", widget: "string" }
+              - label: "Thumbnail / Icon Image"
+                name: "images"
+                widget: "list"
+                field: { label: "Image", name: "image", widget: "image" }
+              - { label: "Source URL (beardbros.in)", name: "source", widget: "string" }
+              - label: "Write-up (one paragraph per box)"
+                name: "body"
+                widget: "list"
+                field: { label: "Paragraph", name: "paragraph", widget: "text" }
+                required: false
+              - label: "YouTube Video ID (the part after youtu.be/, optional)"
+                name: "youtube"
+                widget: "string"
+                required: false
+
+  - name: "case_studies"
+    label: "Case Studies (Reading List)"
+    files:
+      - file: "src/data/case-studies.json"
+        label: "All Case Studies"
+        name: "caseStudies"
+        fields:
+          - label: "Case Studies"
+            name: "caseStudies"
+            widget: "list"
+            summary: "{{fields.client}} — {{fields.dek}}"
+            fields:
+              - { label: "Slug", name: "slug", widget: "string" }
+              - { label: "Client", name: "client", widget: "string" }
+              - { label: "Monogram (2 letters)", name: "monogram", widget: "string" }
+              - { label: "Sector", name: "sector", widget: "string" }
+              - { label: "Year", name: "year", widget: "string" }
+              - { label: "Accent Colour", name: "accent", widget: "color" }
+              - { label: "Dek (one-line hook)", name: "dek", widget: "string" }
+              - label: "Headline Metrics"
+                name: "metrics"
+                widget: "list"
+                fields:
+                  - { label: "Value", name: "value", widget: "string" }
+                  - { label: "Label", name: "label", widget: "string" }
+              - { label: "Read Time (e.g. 4 min)", name: "read", widget: "string" }
+              - label: "Sections"
+                name: "sections"
+                widget: "list"
+                fields:
+                  - { label: "Heading", name: "heading", widget: "string" }
+                  - label: "Paragraphs"
+                    name: "paras"
+                    widget: "list"
+                    field: { label: "Paragraph", name: "para", widget: "text" }
+
+  - name: "journal"
+    label: "Journal (Blog)"
+    files:
+      - file: "src/data/journal.json"
+        label: "All Posts"
+        name: "journal"
+        fields:
+          - label: "Posts"
+            name: "journal"
+            widget: "list"
+            summary: "{{fields.title}}"
+            fields:
+              - { label: "Slug", name: "slug", widget: "string" }
+              - { label: "Title", name: "title", widget: "string" }
+              - { label: "Dek (one-line hook)", name: "dek", widget: "string" }
+              - { label: "Date", name: "date", widget: "date", date_format: "YYYY-MM-DD" }
+              - { label: "Read Time (e.g. 5 min)", name: "read", widget: "string" }
+              - { label: "Tag", name: "tag", widget: "string" }
+              - label: "Body (one paragraph per box)"
+                name: "body"
+                widget: "list"
+                field: { label: "Paragraph", name: "paragraph", widget: "text" }
+
+  - name: "testimonials"
+    label: "Testimonials"
+    files:
+      - file: "src/data/testimonials.json"
+        label: "All Testimonials"
+        name: "testimonials"
+        fields:
+          - label: "Testimonials"
+            name: "testimonials"
+            widget: "list"
+            summary: "{{fields.author}} — {{fields.role}}"
+            fields:
+              - { label: "Author", name: "author", widget: "string" }
+              - { label: "Role / Company", name: "role", widget: "string" }
+              - { label: "Quote", name: "quote", widget: "text" }
+              - { label: "Accent Colour", name: "accent", widget: "color" }
+
+  - name: "websites"
+    label: "Websites (Safari)"
+    files:
+      - file: "src/data/websites.json"
+        label: "All Websites"
+        name: "websites"
+        fields:
+          - label: "Websites"
+            name: "websites"
+            widget: "list"
+            summary: "{{fields.name}} — {{fields.url}}"
+            fields:
+              - { label: "Name", name: "name", widget: "string" }
+              - { label: "URL (include https://)", name: "url", widget: "string" }
+
+  - name: "notes"
+    label: "Notes App Content"
+    files:
+      - file: "src/data/agency-notes.json"
+        label: "All Notes"
+        name: "agencyNotes"
+        fields:
+          - label: "Notes"
+            name: "agencyNotes"
+            widget: "list"
+            summary: "{{fields.title}}"
+            fields:
+              - { label: "Slug", name: "slug", widget: "string" }
+              - { label: "Title", name: "title", widget: "string" }
+              - { label: "Stamp (small label, e.g. Pinned)", name: "stamp", widget: "string" }
+              - label: "Body (one line per box — start a line with \"— \" for a bullet point)"
+                name: "body"
+                widget: "list"
+                field: { label: "Line", name: "line", widget: "text" }
