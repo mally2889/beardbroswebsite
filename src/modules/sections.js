@@ -1,6 +1,7 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { splitWords, prefersReducedMotion, scrambleText } from './utils.js';
+import { FORM_ENDPOINT } from '../data/contact.js';
 
 /* ---------- hero intro (runs after preloader) ---------- */
 export function heroIntro(gl) {
@@ -278,13 +279,6 @@ export function setFooterYear() {
 }
 
 /* ---------- contact form ---------- */
-// FormSubmit delivers enquiries to this address — no account needed. The first
-// submission triggers a one-time activation email to mally@beardbros.in;
-// activate it there or every submission before that point will fail silently.
-// After activating you can swap in the random-alias endpoint FormSubmit gives
-// you to keep the address out of the bundle.
-const FORM_ENDPOINT = 'https://formsubmit.co/ajax/mally@beardbros.in';
-
 export function initContactForm() {
   const form = document.querySelector('[data-contact-form]');
   if (!form) return;

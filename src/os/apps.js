@@ -1,4 +1,6 @@
 import { services } from '../data/services.js';
+import iconOverrides from '../data/icon-overrides.json';
+import { FORM_ENDPOINT } from '../data/contact.js';
 import { projectsData } from '../data/projects-full.js';
 import { caseStudies } from '../data/case-studies.js';
 import { journal } from '../data/journal.js';
@@ -92,17 +94,26 @@ const art = (inner) =>
   `<svg class="icon-art" viewBox="0 0 100 100" aria-hidden="true">${inner}</svg>`;
 
 /**
- * Manual icon overrides — drop a same-name PNG in /public/icons/ (e.g.
- * icons/safari.png) and it replaces the built-in artwork on both the
- * desktop Dock and the phone Home Screen/Dock, no code change needed. Every
- * icon slot renders its normal SVG first (so nothing ever looks broken),
- * then this probes for a custom file and swaps it in if one loads.
- * `root` is any container just painted with one or more `[data-icon-id]`
- * tiles (a whole Dock, a whole page of Home Screen icons, etc.).
+ * Icon overrides — the "App Icons" screen in /admin (backed by
+ * icon-overrides.json) lets an editor upload a replacement image per app;
+ * that takes priority. Failing that, dropping a same-name PNG straight into
+ * /public/icons/ (e.g. icons/safari.png) still works as a code-free manual
+ * fallback — see public/icons/README.md. Either way it replaces the
+ * built-in artwork on both the desktop Dock and the phone Home Screen/Dock,
+ * no code change needed. Every icon slot renders its normal SVG first (so
+ * nothing ever looks broken), then this swaps in a custom image if one's
+ * configured or found. `root` is any container just painted with one or
+ * more `[data-icon-id]` tiles (a whole Dock, a whole page of Home Screen
+ * icons, etc.).
  */
 export function enhanceIconArt(root) {
   root.querySelectorAll('[data-icon-id]').forEach((el) => {
     const id = el.dataset.iconId;
+    const custom = iconOverrides[id];
+    if (custom) {
+      el.innerHTML = `<img class="icon-art-custom" src="${custom}" alt="" />`;
+      return;
+    }
     const probe = new Image();
     probe.onload = () => {
       el.innerHTML = `<img class="icon-art-custom" src="/icons/${id}.png" alt="" />`;
@@ -826,7 +837,7 @@ const mail = {
       <div class="ml__sent" data-ml-sent hidden>
         <span class="ml__tick">${svg('<path d="M4 12.5l5.5 5.5L20 7"/>', 2.4)}</span>
         <p>Message sent</p>
-        <small>Prototype — nothing actually left the device.</small>
+        <small>We reply within one working day.</small>
       </div>`;
   },
 
@@ -834,8 +845,9 @@ const mail = {
     const form = root.querySelector('[data-ml]');
     const sent = root.querySelector('[data-ml-sent]');
     const err = root.querySelector('[data-ml-error]');
+    const send = form.querySelector('.ml__send');
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const missing = [...form.querySelectorAll('[required]')].filter((f) => !f.value.trim());
 
@@ -847,8 +859,28 @@ const mail = {
       }
 
       err.hidden = true;
-      form.hidden = true;
-      sent.hidden = false;
+      send.disabled = true;
+      send.textContent = 'Sending…';
+
+      const data = new FormData(form);
+      data.append('_subject', 'New enquiry — beardbros.in (Mail app)');
+
+      try {
+        const res = await fetch(FORM_ENDPOINT, {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+          body: data,
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        form.hidden = true;
+        sent.hidden = false;
+      } catch {
+        err.textContent = 'Something went wrong — please try again, or use the Contact page.';
+        err.hidden = false;
+      } finally {
+        send.disabled = false;
+        send.textContent = 'Send';
+      }
     });
   },
 };

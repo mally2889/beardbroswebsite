@@ -4,19 +4,13 @@ The site now has a small admin panel at **`/admin`** (e.g. `https://beardbros.in
 
 It's built on **Decap CMS** (free, open source, made for exactly this kind of static site). Every edit you make there is committed straight to the site's GitHub repo and triggers a new deploy on Netlify automatically — the same as if a developer had pushed a change.
 
-## One-time setup (only needs doing once, by whoever owns the Netlify account)
+## One-time setup (only needs doing once, by whoever owns the GitHub repo)
 
-These three steps have to happen before `/admin` will actually let anyone log in. Do them in this order:
-
-1. **Connect the GitHub repo to Netlify.** In the Netlify dashboard → Site settings → Build & deploy → Link to a Git repository, and point it at this project's GitHub repo. (If the site is currently deployed via `netlify deploy` from the command line instead of a connected repo, this step switches it over to deploy automatically on every push — a good thing, not just a CMS requirement.)
-2. **Enable Identity.** Site settings → Identity → Enable Identity. This is Netlify's built-in login system — it's what "Login with Netlify Identity" on `/admin` is talking to.
-3. **Enable Git Gateway.** Still under Identity → Services → Git Gateway → Enable. This is the piece that lets a logged-in Identity user actually write commits to the repo, without needing their own GitHub account or personal access token.
-
-Then, under Identity → Invite users, invite whichever email addresses should be able to edit the site. They'll get an email to set a password, and from then on they log in at `/admin` with that email and password.
+`/admin` logs in with **GitHub OAuth** directly — you sign in with a GitHub account, not a separate email/password. Whoever should be able to edit the site needs to be a collaborator on the `mally2889/beardbroswebsite` GitHub repo (Settings → Collaborators, on GitHub). No Netlify Identity, no Git Gateway, no invite email involved.
 
 ## Day to day: how to actually edit things
 
-Go to `/admin`, log in, and you'll see six sections in the sidebar:
+Go to `/admin`, log in, and you'll see seven sections in the sidebar:
 
 - **Portfolio Projects** — all 61 projects shown in Safari's Suggestions grid. Every project lives here regardless of whether it also appears in Instagram (see below).
 - **Websites (Safari)** — the live client sites embedded in Safari's "Websites" section (opens each one inline via iframe). Add/remove/rename entries here; each just needs a **Name** and a **URL**.
@@ -24,6 +18,7 @@ Go to `/admin`, log in, and you'll see six sections in the sidebar:
 - **Journal (Blog)** — the posts in the Journal app.
 - **Testimonials** — the client quotes shown in Safari.
 - **Notes App Content** — the five notes in the Notes app (About Us, How We Work, etc.).
+- **App Icons** — swap the built-in icon for Safari, Notes, Instagram, Files, Journal, Mail, Calendar, Radio, Clock, Weather, or Settings on the phone Home Screen/Dock and desktop Dock. Upload an image per app; leave a slot blank to keep the built-in icon.
 
 ### Safari vs. Instagram
 
@@ -50,9 +45,11 @@ Same pattern throughout: one entry, one list inside it, expand the item you want
 
 For **Notes**, a body line that starts with `— ` (dash, space) renders as a bullet point instead of a plain paragraph — that's how "What We Do" and "FAQ's" get their bullet lists. Leave that prefix off for a normal paragraph.
 
-### Editing app icons yourself, without the CMS
+### Editing app icons
 
-Every app icon (Safari, Instagram, Notes, Mail, etc.) can be swapped by dropping a same-named PNG into `public/icons/` — see `public/icons/README.md` for the exact filenames and image guidelines. This isn't through `/admin`; it's a plain file in the repo, so it goes through whatever your normal way of pushing files is (a commit, or GitHub's own "upload file" screen if you don't have git set up locally). Delete the file to go back to the built-in icon.
+Go to **App Icons** in `/admin` and upload an image for whichever app you want to change — square images work best (e.g. 512×512px, PNG with transparency for rounded corners). Clear the field and Save to go back to the built-in icon.
+
+There's also a code-free manual option that doesn't need `/admin` at all: drop a same-named PNG into `public/icons/` (see `public/icons/README.md` for exact filenames). That's a fallback for anyone pushing files directly to the repo — the `/admin` upload above is checked first, so it always wins if both are set.
 
 ### What this CMS *can't* do yet — ask the developer
 
@@ -60,4 +57,4 @@ Most projects now have a real photo/video slider (via `portfolio-media.js`) rath
 
 ## If something looks wrong
 
-Every edit is a normal git commit, so nothing is ever truly lost — a developer can always look at the repo's commit history and revert a bad edit if needed. If `/admin` won't let you log in at all, the most likely cause is that step 2 or 3 of the one-time setup above hasn't been done yet on the Netlify side.
+Every edit is a normal git commit, so nothing is ever truly lost — a developer can always look at the repo's commit history and revert a bad edit if needed. If `/admin` won't let you log in at all, the most likely cause is that your GitHub account hasn't been added as a collaborator on the repo yet (see setup above).
