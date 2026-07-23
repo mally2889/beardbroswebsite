@@ -1,5 +1,6 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: mally2889/beardbroswebsite
   branch: main
 
 media_folder: "public/portfolio"
