@@ -160,6 +160,13 @@ body {
   font-weight: 600;
   user-select: none;
   color: #fff;
+  /* The Control Center pull-down starts here and is fully JS-driven
+     (gsap.set on every pointermove). The screen's ancestor `pan-y` is
+     needed for genuine scrollable content elsewhere, but it also invites
+     Android's compositor to treat this drag as a native scroll from frame
+     one, which is what made the pull-down feel smooth on iOS but sluggish
+     on Android — this opts the gesture out of that fight entirely. */
+  touch-action: none;
 }
 
 .statusbar__time {
@@ -313,6 +320,11 @@ body {
   background: none;
   border: 0;
   -webkit-tap-highlight-color: transparent;
+  /* The long-press → drag reorder is entirely pointer-event driven; without
+     this, Android's compositor treats the press as a native pan candidate
+     from the first frame and fights the JS-driven drag for the gesture,
+     which is what made reordering feel janky there but not on iOS Safari. */
+  touch-action: none;
 }
 
 /*
@@ -686,6 +698,7 @@ body {
   transform: translateY(-650px);
   will-change: transform;
   user-select: none;
+  touch-action: none;
 }
 
 .cc__grabber {
@@ -1277,6 +1290,10 @@ body {
   box-shadow: var(--glass-rim), var(--glass-lift);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
+  /* Same reasoning as .app-icon — the long-press reorder drag owns the
+     gesture entirely; letting Android's native pan compete with it is what
+     made the drag stutter there. */
+  touch-action: none;
 }
 
 .tw__label {
@@ -1403,6 +1420,14 @@ body {
   color: rgba(23, 19, 15, 0.6);
 }
 
+[data-theme='light'] .app__metric span {
+  color: rgba(23, 19, 15, 0.6);
+}
+
+[data-theme='light'] .app__quote footer {
+  color: rgba(23, 19, 15, 0.5);
+}
+
 /* Clock icon hands: one keyframe, three speeds, offset by negative delay. */
 @keyframes ck-sweep {
   to {
@@ -1420,4 +1445,41 @@ body {
   .ck-hand {
     animation-play-state: paused;
   }
+}
+
+/* ------------------------------------------------------- easter eggs -- */
+
+/* iOS-style notification banner, pinned under the notch and clipped by the
+   screen's own rounded corners rather than floating over the whole viewport
+   — it reads as part of the device, not a browser-level toast. */
+.ph-banner {
+  position: absolute;
+  top: 3.2rem;
+  left: 50%;
+  z-index: 30;
+  transform: translateX(-50%);
+  max-width: calc(100% - 2.4rem);
+  padding: 0.65rem 1.1rem;
+  border-radius: 16px;
+  background: var(--glass-tint);
+  box-shadow: var(--glass-rim), var(--glass-lift);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+/* Beard Bros mark, raining — five quick taps on empty wallpaper finds it. */
+.ph-confetti {
+  position: absolute;
+  top: 0;
+  z-index: 29;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.4));
 }

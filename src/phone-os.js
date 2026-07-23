@@ -422,6 +422,19 @@ dots.addEventListener('click', (e) => {
  * drag near the left/right edge for a moment flips to the adjacent page,
  * same as a real springboard. Tapping the "Done" pill, or empty background
  * while editing, exits back to normal tap-to-open behaviour.
+ *
+ * Reordering moves the real dragged DOM node directly (insertBefore),
+ * exactly like the Today widget drag below — not by re-splicing `iconOrder`
+ * and regenerating every icon's HTML on every animation frame. That
+ * wholesale-rebuild approach (a) re-ran the custom-icon image probe on
+ * every frame, which is real jank, worse on slower/Android GPUs than on
+ * an iPhone, and (b) could destroy and recreate the dragged icon's own
+ * node mid-drag, which is what made two icons briefly show the same
+ * artwork — one frame's fresh (still-visible) replacement node and the
+ * next frame's, before the "hide while dragging" class caught up. Moving
+ * the one real node sidesteps both: `iconOrder` itself is only
+ * resynchronised from the DOM, and pages re-chunked to a strict
+ * ICONS_PER_PAGE grid, once — at drop, not on every frame.
  */
 {
   const LONG_PRESS_MS = 500;
@@ -436,14 +449,11 @@ dots.addEventListener('click', (e) => {
   let pressStartY = 0;
 
   let draggedId = null;
+  let draggedEl = null;
   let dragGhost = null;
   let dragOffsetX = 0;
   let dragOffsetY = 0;
   let edgeTimer = null;
-  let rafPending = false;
-  let lastClientX = 0;
-  let lastClientY = 0;
-  let lastTargetIndex = -1;
 
   function setIconEditMode(on) {
     iconEditMode = on;
@@ -458,27 +468,16 @@ dots.addEventListener('click', (e) => {
     return iconPages[page]?.querySelector('.grid') ?? null;
   }
 
-  function closestIconOrderIndex(clientX, clientY) {
-    const gridEl = currentIconGrid();
-    if (!gridEl) return -1;
-    const icons = [...gridEl.querySelectorAll('.app-icon')];
-    let bestSlot = -1;
-    let bestDist = Infinity;
-    icons.forEach((el, i) => {
-      const r = el.getBoundingClientRect();
-      const d = Math.hypot(r.left + r.width / 2 - clientX, r.top + r.height / 2 - clientY);
-      if (d < bestDist) {
-        bestDist = d;
-        bestSlot = i;
-      }
-    });
-    return bestSlot === -1 ? -1 : page * ICONS_PER_PAGE + bestSlot;
-  }
-
   function startIconDrag(icon, e) {
     draggedId = icon.dataset.id;
-    lastTargetIndex = iconOrder.indexOf(draggedId);
+    draggedEl = icon;
     icon.classList.add('is-dragging-icon');
+    /* Without capture, a finger that drifts off `icon` mid-drag can have its
+       pointerup swallowed by whatever OS-level gesture (Android's own
+       edge-swipe/notification-shade handling, mainly) picks it up instead —
+       which is how the ghost below was getting stranded on screen forever,
+       still showing the dragged icon's art on top of every app until reload. */
+    icon.setPointerCapture(e.pointerId);
 
     const rect = icon.getBoundingClientRect();
     dragOffsetX = e.clientX - rect.left;
@@ -519,6 +518,33 @@ dots.addEventListener('click', (e) => {
     }
   }
 
+  /* Nearest-neighbour grid reorder, same idea as the widget drag's
+     vertical-list version — find the icon whose centre the pointer is
+     currently closest to, and slot the dragged icon in right before it
+     (or at the end of the grid if nothing's closer). Re-resolves
+     `currentIconGrid()` on every call, so once an edge-flip lands on a
+     new page this naturally starts targeting *that* page's grid, moving
+     the node across pages the same way `insertBefore` moves it within one. */
+  function placeDraggedIcon(clientX, clientY) {
+    const gridEl = currentIconGrid();
+    if (!gridEl || !draggedEl) return;
+    const icons = [...gridEl.children].filter((el) => el !== draggedEl);
+    let bestIndex = icons.length;
+    let bestDist = Infinity;
+    icons.forEach((el, i) => {
+      const r = el.getBoundingClientRect();
+      const d = Math.hypot(r.left + r.width / 2 - clientX, r.top + r.height / 2 - clientY);
+      if (d < bestDist) {
+        bestDist = d;
+        bestIndex = i;
+      }
+    });
+    const ref = icons[bestIndex] ?? null;
+    if (draggedEl.parentElement !== gridEl || draggedEl.nextSibling !== ref) {
+      gridEl.insertBefore(draggedEl, ref);
+    }
+  }
+
   function endIconDrag() {
     clearTimeout(pressTimer);
     pressTimer = null;
@@ -530,12 +556,15 @@ dots.addEventListener('click', (e) => {
       dragGhost.remove();
       dragGhost = null;
     }
-    if (draggedId) {
-      pages.querySelector(`[data-id="${draggedId}"]`)?.classList.remove('is-dragging-icon');
+    if (draggedEl) {
+      draggedEl.classList.remove('is-dragging-icon');
+      const iconPages = [...pages.querySelectorAll('.page')].filter((p) => p.getAttribute('aria-label') !== 'Today');
+      iconOrder = iconPages.flatMap((p) => [...p.querySelectorAll('.app-icon')].map((el) => el.dataset.id));
       saveIconOrder();
+      rebuildIconPages();
     }
     draggedId = null;
-    lastTargetIndex = -1;
+    draggedEl = null;
   }
 
   pages.addEventListener('pointerdown', (e) => {
@@ -569,30 +598,17 @@ dots.addEventListener('click', (e) => {
 
     if (!draggedId) return;
     e.preventDefault();
-    lastClientX = e.clientX;
-    lastClientY = e.clientY;
     moveIconGhost(e.clientX, e.clientY);
     checkEdgeFlip(e.clientX);
-
-    if (rafPending) return;
-    rafPending = true;
-    requestAnimationFrame(() => {
-      rafPending = false;
-      if (!draggedId) return;
-      const targetIndex = closestIconOrderIndex(lastClientX, lastClientY);
-      if (targetIndex === -1 || targetIndex === lastTargetIndex) return;
-      lastTargetIndex = targetIndex;
-      const from = iconOrder.indexOf(draggedId);
-      if (from === -1 || from === targetIndex) return;
-      iconOrder.splice(from, 1);
-      iconOrder.splice(targetIndex, 0, draggedId);
-      rebuildIconPages();
-      pages.querySelector(`[data-id="${draggedId}"]`)?.classList.add('is-dragging-icon');
-    });
+    placeDraggedIcon(e.clientX, e.clientY);
   });
 
   pages.addEventListener('pointerup', endIconDrag);
   pages.addEventListener('pointercancel', endIconDrag);
+  /* Belt-and-braces: if capture is ever revoked without a pointerup/
+     pointercancel reaching us (seen on some Android WebViews when a system
+     gesture takes over), this still guarantees the ghost gets torn down. */
+  pages.addEventListener('lostpointercapture', endIconDrag);
 
   doneBtn.addEventListener('click', () => setIconEditMode(false));
 }
@@ -624,6 +640,7 @@ dots.addEventListener('click', (e) => {
   function startWidgetDrag(card, e) {
     draggedEl = card;
     card.classList.add('is-dragging-widget');
+    card.setPointerCapture(e.pointerId);
 
     const rect = card.getBoundingClientRect();
     dragOffsetX = e.clientX - rect.left;
@@ -718,6 +735,7 @@ dots.addEventListener('click', (e) => {
 
   todayPage.addEventListener('pointerup', endWidgetDrag);
   todayPage.addEventListener('pointercancel', endWidgetDrag);
+  todayPage.addEventListener('lostpointercapture', endWidgetDrag);
 }
 
 /* ------------------------------------------------------ press feedback -- */
@@ -1023,6 +1041,7 @@ cc.addEventListener('click', (e) => {
   document.querySelector('.statusbar').addEventListener('pointerdown', (e) => {
     if (!app.hidden || ccOpen) return;
     e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
     startY = e.clientY;
     dragging = true;
     mode = 'open';
@@ -1032,6 +1051,7 @@ cc.addEventListener('click', (e) => {
   ccSheet.addEventListener('pointerdown', (e) => {
     if (!ccOpen) return;
     e.preventDefault();
+    ccSheet.setPointerCapture(e.pointerId);
     startY = e.clientY;
     dragging = true;
     mode = 'close';
@@ -1059,6 +1079,23 @@ cc.addEventListener('click', (e) => {
     else setCC(!(-dy > 45));
     mode = null;
   });
+
+  /* Previously unhandled — a `pointerdown` this block reacts to had no
+     matching cancel path, so a gesture interrupted by the OS (which is
+     common enough on Android; iOS Safari rarely takes gestures away
+     mid-drag) left `dragging` stuck true, and every later pointermove
+     — including ones that had nothing to do with Control Center — kept
+     shoving the sheet around. Snapping back to whatever state it was
+     already in mirrors what a released drag that didn't cross the
+     threshold does. */
+  const cancelDrag = () => {
+    if (!dragging) return;
+    dragging = false;
+    setCC(ccOpen);
+    mode = null;
+  };
+  screen.addEventListener('pointercancel', cancelDrag);
+  screen.addEventListener('lostpointercapture', cancelDrag);
 }
 
 /* --------------------------------------------------------------- sleep -- */
@@ -1069,3 +1106,88 @@ armIdleSleep({
   dateEl: $('[data-phone-sleep-date]'),
   timeoutMs: 60_000,
 });
+
+/* ------------------------------------------------------- easter eggs -- */
+
+/* A one-line iOS-style banner, appended into the screen itself (not
+   document.body) so it's clipped by the device's own rounded corners
+   instead of floating over the whole browser viewport. */
+let bannerTimer = null;
+function phoneBanner(msg) {
+  let banner = $('[data-phone-banner]');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.className = 'ph-banner';
+    banner.setAttribute('data-phone-banner', '');
+    screen.appendChild(banner);
+  }
+  banner.textContent = msg;
+  gsap.killTweensOf(banner);
+  gsap.fromTo(
+    banner,
+    { y: -50, autoAlpha: 0 },
+    { y: 0, autoAlpha: 1, duration: reduced ? 0 : 0.5, ease: 'back.out(1.7)' },
+  );
+  clearTimeout(bannerTimer);
+  bannerTimer = setTimeout(() => {
+    gsap.to(banner, { y: -50, autoAlpha: 0, duration: reduced ? 0 : 0.35, ease: 'power2.in' });
+  }, 2200);
+}
+
+/* Five quick taps on empty Home Screen wallpaper rains the real agency mark
+   down the screen — same idea as the desktop build's brand-mark tap, ported
+   to mobile. Falls inside `screen`, which clips to the device's rounded
+   corners, so it reads as a phone doing a trick rather than confetti loose
+   on the page. */
+function launchBrandRain() {
+  if (reduced) return;
+  const w = screen.clientWidth;
+  const h = screen.clientHeight;
+  for (let i = 0; i < 10; i++) {
+    const img = document.createElement('img');
+    img.src = '/beard-bros-logo.webp';
+    img.className = 'ph-confetti';
+    img.alt = '';
+    const size = 15 + Math.random() * 16;
+    img.style.width = `${size}px`;
+    img.style.left = `${Math.random() * (w - size)}px`;
+    screen.appendChild(img);
+    gsap.fromTo(
+      img,
+      { y: -40, rotate: 0, autoAlpha: 0 },
+      {
+        y: h + 60,
+        rotate: (Math.random() - 0.5) * 300,
+        autoAlpha: 1,
+        duration: 1.5 + Math.random() * 0.9,
+        delay: Math.random() * 0.3,
+        ease: 'power1.in',
+        onComplete: () => img.remove(),
+      },
+    );
+  }
+}
+
+/* Five quick taps on empty wallpaper — not an icon, not the info card —
+   triggers the rain. `click` (not pointerup) so a genuine drag, whether
+   it's the page-swipe or an icon long-press, never gets miscounted as a
+   tap; browsers already withhold `click` once a pointer has moved past
+   their own drag threshold. */
+{
+  let wallpaperTaps = 0;
+  let wallpaperTapTimer = null;
+  pages.addEventListener('click', (e) => {
+    if (iconEditMode || widgetEditMode) return;
+    if (e.target.closest('.app-icon, .widget, .tw, button')) return;
+    wallpaperTaps += 1;
+    clearTimeout(wallpaperTapTimer);
+    wallpaperTapTimer = setTimeout(() => {
+      wallpaperTaps = 0;
+    }, 1500);
+    if (wallpaperTaps >= 5) {
+      wallpaperTaps = 0;
+      phoneBanner('🧔 Two brothers, one system.');
+      launchBrandRain();
+    }
+  });
+}
