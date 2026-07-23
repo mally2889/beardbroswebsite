@@ -1,13 +1,13 @@
 {
-  "safari": "",
-  "notes": "",
-  "settings": "",
+  "safari": "/icons/img_5408.png",
+  "notes": "/icons/img_5409.png",
+  "settings": "/icons/img_5417.png",
   "clock": "",
-  "weather": "",
-  "mail": "",
-  "files": "",
-  "journal": "",
-  "radio": "",
-  "feed": "",
-  "calendar": ""
+  "weather": "/icons/img_5416.png",
+  "mail": "/icons/img_5413.png",
+  "files": "/icons/img_5411.png",
+  "journal": "/icons/img_5412.png",
+  "radio": "/icons/img_5415.png",
+  "feed": "/icons/img_5410.png",
+  "calendar": "/icons/img_5414.png"
 }
