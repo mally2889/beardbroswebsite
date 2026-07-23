@@ -142,6 +142,29 @@ enhanceIconArt(dock);
   });
 }
 
+/*
+ * Dock hover tooltip — the name that pops up over an icon, same as the
+ * real macOS Dock. Kept as a sibling of the (GSAP-magnified) icons rather
+ * than a child, so it doesn't inherit their scale transform and stays a
+ * fixed, readable size no matter how much the icon underneath it grows.
+ */
+{
+  const tip = document.createElement('div');
+  tip.className = 'dt-dock__tip';
+  dock.appendChild(tip);
+
+  dock.querySelectorAll('.dt-dock__item').forEach((el) => {
+    el.addEventListener('pointerenter', () => {
+      tip.textContent = el.getAttribute('aria-label');
+      const dockBox = dock.getBoundingClientRect();
+      const itemBox = el.getBoundingClientRect();
+      tip.style.left = `${itemBox.left + itemBox.width / 2 - dockBox.left}px`;
+      tip.classList.add('is-visible');
+    });
+    el.addEventListener('pointerleave', () => tip.classList.remove('is-visible'));
+  });
+}
+
 /* ---------------------------------------------------------- window mgmt -- */
 
 /* Every app is openable (from the menu bar, a widget, etc.) even if it has

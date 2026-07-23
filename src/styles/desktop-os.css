@@ -1388,6 +1388,40 @@ html.os-desktop body {
   transform: translateX(-50%);
 }
 
+/* Always a dark pill regardless of theme — a momentary hover label, same
+   as the rest of the desktop chrome (menu bar, Control Centre) that stays
+   fixed rather than following System Settings → Appearance. */
+.dt-dock__tip {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  z-index: 10;
+  margin-bottom: 14px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--bone);
+  white-space: nowrap;
+  pointer-events: none;
+  background: rgba(30, 26, 22, 0.92);
+  border-radius: 8px;
+  box-shadow: var(--glass-rim), 0 8px 20px -8px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transform: translateX(-50%) translateY(4px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+
+.dt-dock__tip.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dt-dock__tip {
+    transition: opacity 0.12s ease;
+  }
+}
+
 /* -------------------------------------------------------------- windows -- */
 
 .dt-windows {
