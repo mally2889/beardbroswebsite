@@ -138,17 +138,17 @@ collections:
         name: "iconOverrides"
         description: "Upload a custom icon per app to replace the built-in artwork on the phone Home Screen/Dock and desktop Dock. Leave blank to keep the built-in icon. Square images work best (e.g. 512x512px, PNG with transparency)."
         fields:
-          - { label: "Safari (Work browser)", name: "safari", widget: "image", required: false, media_folder: "public/icons", public_folder: "/icons" }
-          - { label: "Notes", name: "notes", widget: "image", required: false, media_folder: "public/icons", public_folder: "/icons" }
-          - { label: "Instagram (Feed)", name: "feed", widget: "image", required: false, media_folder: "public/icons", public_folder: "/icons" }
-          - { label: "Files", name: "files", widget: "image", required: false, media_folder: "public/icons", public_folder: "/icons" }
-          - { label: "Journal", name: "journal", widget: "image", required: false, media_folder: "public/icons", public_folder: "/icons" }
-          - { label: "Mail", name: "mail", widget: "image", required: false, media_folder: "public/icons", public_folder: "/icons" }
-          - { label: "Calendar", name: "calendar", widget: "image", required: false, media_folder: "public/icons", public_folder: "/icons" }
-          - { label: "Radio", name: "radio", widget: "image", required: false, media_folder: "public/icons", public_folder: "/icons" }
-          - { label: "Clock", name: "clock", widget: "image", required: false, media_folder: "public/icons", public_folder: "/icons" }
-          - { label: "Weather", name: "weather", widget: "image", required: false, media_folder: "public/icons", public_folder: "/icons" }
-          - { label: "Settings", name: "settings", widget: "image", required: false, media_folder: "public/icons", public_folder: "/icons" }
+          - { label: "Safari (Work browser)", name: "safari", widget: "image", required: false, media_folder: "/public/icons", public_folder: "/icons" }
+          - { label: "Notes", name: "notes", widget: "image", required: false, media_folder: "/public/icons", public_folder: "/icons" }
+          - { label: "Instagram (Feed)", name: "feed", widget: "image", required: false, media_folder: "/public/icons", public_folder: "/icons" }
+          - { label: "Files", name: "files", widget: "image", required: false, media_folder: "/public/icons", public_folder: "/icons" }
+          - { label: "Journal", name: "journal", widget: "image", required: false, media_folder: "/public/icons", public_folder: "/icons" }
+          - { label: "Mail", name: "mail", widget: "image", required: false, media_folder: "/public/icons", public_folder: "/icons" }
+          - { label: "Calendar", name: "calendar", widget: "image", required: false, media_folder: "/public/icons", public_folder: "/icons" }
+          - { label: "Radio", name: "radio", widget: "image", required: false, media_folder: "/public/icons", public_folder: "/icons" }
+          - { label: "Clock", name: "clock", widget: "image", required: false, media_folder: "/public/icons", public_folder: "/icons" }
+          - { label: "Weather", name: "weather", widget: "image", required: false, media_folder: "/public/icons", public_folder: "/icons" }
+          - { label: "Settings", name: "settings", widget: "image", required: false, media_folder: "/public/icons", public_folder: "/icons" }
 
   - name: "notes"
     label: "Notes App Content"
