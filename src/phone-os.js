@@ -783,7 +783,13 @@ function open(view, tile) {
 
   const settle = () => {
     phase = 'idle';
-    appTitle.focus();
+    /* preventScroll matters here: the title sits inside the phone mockup's
+       own clipped, centered device frame, not the real page flow. Without
+       it, mobile browsers "helpfully" scroll the whole document to bring
+       the newly-focused element into view — shoving the mockup up and
+       leaving dead space below it, since the page itself has nothing to
+       show there. */
+    appTitle.focus({ preventScroll: true });
     runQueued();
   };
 
@@ -826,7 +832,7 @@ function close() {
     unmount?.();
     unmount = null;
     appBody.innerHTML = '';
-    openFrom?.closest('.app-icon, .dock__item')?.focus();
+    openFrom?.closest('.app-icon, .dock__item')?.focus({ preventScroll: true });
     phase = 'idle';
     runQueued();
   };
