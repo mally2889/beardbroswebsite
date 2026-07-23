@@ -2546,6 +2546,117 @@
   border-color: rgba(255, 253, 248, 0.94);
 }
 
+/* -------------------------------------------------- light-mode text-color fixes --- */
+/* Base rules above are tuned for cream text on a dark app surface; in light mode
+   (System Settings → Appearance) the app body goes near-white, so every one of
+   these needs its own ink-toned counterpart or it reads as invisible/low-contrast
+   text on a light background. */
+
+[data-theme='light'] .sf__bar,
+[data-theme='light'] .sf__toolbar button,
+[data-theme='light'] .ws__glyph,
+[data-theme='light'] .ig__like {
+  color: rgba(23, 19, 15, 0.85);
+}
+
+[data-theme='light'] .sf__go,
+[data-theme='light'] .nt__preview,
+[data-theme='light'] .cal__heading,
+[data-theme='light'] .ph__caption,
+[data-theme='light'] .st__list em,
+[data-theme='light'] .cal__fallback,
+[data-theme='light'] .rd__tags,
+[data-theme='light'] .rd__volume {
+  color: rgba(23, 19, 15, 0.5);
+}
+
+[data-theme='light'] .sf-tab__chrome span,
+[data-theme='light'] .ck__t,
+[data-theme='light'] .wx__list em {
+  color: rgba(23, 19, 15, 0.75);
+}
+
+[data-theme='light'] .nt__header,
+[data-theme='light'] .nt__stamp,
+[data-theme='light'] .ph__header span,
+[data-theme='light'] .ck__city em {
+  color: rgba(23, 19, 15, 0.42);
+}
+
+[data-theme='light'] .nt__title,
+[data-theme='light'] .ml__row input,
+[data-theme='light'] .ml textarea,
+[data-theme='light'] .cal__grid button,
+[data-theme='light'] .cal__grid span,
+[data-theme='light'] .cal__times button,
+[data-theme='light'] .ph__caption strong,
+[data-theme='light'] .ws__page-bar b,
+[data-theme='light'] .rd__btn,
+[data-theme='light'] .ig__bar-icons,
+[data-theme='light'] .ig__likes b,
+[data-theme='light'] .ig__caption b {
+  color: #17130f;
+}
+
+[data-theme='light'] .nt__note p {
+  color: rgba(23, 19, 15, 0.82);
+}
+
+[data-theme='light'] .ml__row label,
+[data-theme='light'] .ml__sent small,
+[data-theme='light'] .cal__confirm small,
+[data-theme='light'] .ck__zone,
+[data-theme='light'] .wx__meta,
+[data-theme='light'] .wx__loading,
+[data-theme='light'] .wx__src {
+  color: rgba(23, 19, 15, 0.45);
+}
+
+[data-theme='light'] .ml__row input::placeholder,
+[data-theme='light'] .ml textarea::placeholder,
+[data-theme='light'] .fs__list button > svg {
+  color: rgba(23, 19, 15, 0.3);
+}
+
+[data-theme='light'] .cal__dow span {
+  color: rgba(23, 19, 15, 0.35);
+}
+
+[data-theme='light'] .cal__grid button[disabled] {
+  color: rgba(23, 19, 15, 0.2);
+}
+
+[data-theme='light'] .cal__hint,
+[data-theme='light'] .cal__tz,
+[data-theme='light'] .st__note {
+  color: rgba(23, 19, 15, 0.4);
+}
+
+[data-theme='light'] .ph__filters button {
+  color: rgba(23, 19, 15, 0.72);
+}
+
+[data-theme='light'] .st__group,
+[data-theme='light'] .rd__note {
+  color: rgba(23, 19, 15, 0.38);
+}
+
+[data-theme='light'] .jr__dek--lead {
+  color: rgba(23, 19, 15, 0.68);
+}
+
+[data-theme='light'] .wx__city {
+  color: rgba(23, 19, 15, 0.55);
+}
+
+[data-theme='light'] .rl__read {
+  color: rgba(23, 19, 15, 0.32);
+}
+
+[data-theme='light'] .ws__page-bar a {
+  color: rgba(23, 19, 15, 0.65);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ig__like {
     transition: none;
