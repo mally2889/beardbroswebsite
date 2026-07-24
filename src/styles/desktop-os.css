@@ -1403,9 +1403,11 @@ html.os-desktop body {
   color: var(--bone);
   white-space: nowrap;
   pointer-events: none;
-  background: rgba(30, 26, 22, 0.92);
+  background: rgba(30, 26, 22, 0.72);
   border-radius: 8px;
   box-shadow: var(--glass-rim), 0 8px 20px -8px rgba(0, 0, 0, 0.6);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   opacity: 0;
   transform: translateX(-50%) translateY(4px);
   transition: opacity 0.12s ease, transform 0.12s ease;
