@@ -109,21 +109,67 @@ enhanceIconArt(dock);
  * about the transform, so neighbours end up overlapping. Growing
  * margin-left/right in step with the scale pushes them apart in the same
  * tween, the way the real Dock reserves room for whatever it's magnifying.
+ *
+ * The hover tooltip (name pill above an icon, same as the real macOS Dock)
+ * lives in this same block because its position depends on the same scale
+ * math: rects are cached once at rest (`natural`) rather than re-read from
+ * the DOM on each move, since mid-tween the DOM rect reports wherever the
+ * 0.18s GSAP animation currently is, not where it's headed — using that
+ * live value left the tooltip a frame or two behind, briefly overlapping
+ * the icon as it grew instead of sitting above it.
  */
 {
   const items = [...dock.querySelectorAll('.dt-dock__item')];
   const DOCK_ITEM = 52;
   const MAX_SCALE = 1.6;
   const RANGE = 130;
+  const natural = new Map();
+  const captureNatural = () => items.forEach((el) => natural.set(el, el.getBoundingClientRect()));
+  captureNatural();
+  window.addEventListener('resize', captureNatural);
+
+  const scaleFor = (el, cursorX) => {
+    const rect = natural.get(el);
+    const cx = rect.left + rect.width / 2;
+    const dist = Math.abs(cursorX - cx);
+    const t = Math.max(0, 1 - dist / RANGE);
+    const eased = t * t * (3 - 2 * t); // smoothstep — gentler falloff than linear
+    return 1 + eased * (MAX_SCALE - 1);
+  };
+
+  const tip = document.createElement('div');
+  tip.className = 'dt-dock__tip';
+  dock.appendChild(tip);
+  let hovered = null;
+
+  function positionTip(el, cursorX) {
+    const rect = natural.get(el);
+    const scale = reduced ? 1 : scaleFor(el, cursorX);
+    const yOffset = (scale - 1) * -20;
+    const top = rect.bottom + yOffset - rect.height * scale;
+    const dockBox = dock.getBoundingClientRect();
+    tip.style.left = `${rect.left + rect.width / 2 - dockBox.left}px`;
+    tip.style.bottom = `${dockBox.bottom - top + 14}px`;
+  }
+
+  items.forEach((el) => {
+    el.addEventListener('pointerenter', (e) => {
+      hovered = el;
+      tip.textContent = el.getAttribute('aria-label');
+      positionTip(el, e.clientX);
+      tip.classList.add('is-visible');
+    });
+    el.addEventListener('pointerleave', () => {
+      if (hovered === el) hovered = null;
+      tip.classList.remove('is-visible');
+    });
+  });
+
   dock.addEventListener('pointermove', (e) => {
+    if (hovered) positionTip(hovered, e.clientX);
     if (reduced) return;
     items.forEach((el) => {
-      const box = el.getBoundingClientRect();
-      const cx = box.left + box.width / 2;
-      const dist = Math.abs(e.clientX - cx);
-      const t = Math.max(0, 1 - dist / RANGE);
-      const eased = t * t * (3 - 2 * t); // smoothstep — gentler falloff than linear
-      const scale = 1 + eased * (MAX_SCALE - 1);
+      const scale = scaleFor(el, e.clientX);
       const push = ((scale - 1) * DOCK_ITEM) / 2;
       gsap.to(el, {
         scale,
@@ -139,29 +185,6 @@ enhanceIconArt(dock);
     items.forEach((el) =>
       gsap.to(el, { scale: 1, y: 0, marginLeft: 0, marginRight: 0, duration: 0.35, ease: 'power3.out' }),
     );
-  });
-}
-
-/*
- * Dock hover tooltip — the name that pops up over an icon, same as the
- * real macOS Dock. Kept as a sibling of the (GSAP-magnified) icons rather
- * than a child, so it doesn't inherit their scale transform and stays a
- * fixed, readable size no matter how much the icon underneath it grows.
- */
-{
-  const tip = document.createElement('div');
-  tip.className = 'dt-dock__tip';
-  dock.appendChild(tip);
-
-  dock.querySelectorAll('.dt-dock__item').forEach((el) => {
-    el.addEventListener('pointerenter', () => {
-      tip.textContent = el.getAttribute('aria-label');
-      const dockBox = dock.getBoundingClientRect();
-      const itemBox = el.getBoundingClientRect();
-      tip.style.left = `${itemBox.left + itemBox.width / 2 - dockBox.left}px`;
-      tip.classList.add('is-visible');
-    });
-    el.addEventListener('pointerleave', () => tip.classList.remove('is-visible'));
   });
 }
 
